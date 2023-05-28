@@ -22,5 +22,5 @@ with open("../img-example/sjpNp.png", "rb") as f:  # open file
         length, data, crc = parse_data(byte_string, b"PLTE")
         test_PLTE = PLTE(length, data, crc, test_IHDR.color_type)
         test_PLTE.print_info()
-        test_PLTE.plot_palette()
+        test_PLTE.plot_palettes()
         test_PLTE.print_palette()
