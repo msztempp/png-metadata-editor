@@ -140,18 +140,18 @@ print(len(IDAT_data))
 # b jest bajtem odpowiadającym x w poprzednim wierszu obrazu (lub 0, jeśli taki wiersz nie istnieje)
 # c jest bajtem odpowiadającym x w poprzednim wierszu i pikselu bezpośrednio przed pikselem zawierającym x (lub 0, jeśli taki wiersz i piksel nie istnieją)
 
-def PaethPredictor(a, b, c):
-    p = a + b - c
-    pa = abs(p - a)
-    pb = abs(p - b)
-    pc = abs(p - c)
-    if pa <= pb and pa <= pc:
-        Pr = a
-    elif pb <= pc:
-        Pr = b
-    else:
-        Pr = c
-    return Pr
+# def PaethPredictor(a, b, c):
+#     p = a + b - c
+#     pa = abs(p - a)
+#     pb = abs(p - b)
+#     pc = abs(p - c)
+#     if pa <= pb and pa <= pc:
+#         Pr = a
+#     elif pb <= pc:
+#         Pr = b
+#     else:
+#         Pr = c
+#     return Pr
 
 
 Recon = []

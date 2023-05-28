@@ -4,6 +4,6 @@ class Chunk:
         self.chunk_type = chunk_type
         self.crc = crc
 
-    def basic_info(self):
+    def print_basic_info(self):
         print("Type: {chunk_type}".format(chunk_type=self.chunk_type))
         print("Length: {length} bytes".format(length=self.length))
