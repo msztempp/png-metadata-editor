@@ -59,6 +59,6 @@ class PLTE(Chunk):
         plt.show()
 
     def print_info(self):
-        self.basic_info()
+        self.print_basic_info()
 
 

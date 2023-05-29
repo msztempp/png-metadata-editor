@@ -23,7 +23,7 @@ class IHDR(Chunk):
         self.analyse(data)
 
     def print_info(self):
-        self.basic_info()
+        self.print_basic_info()
         print(f'Width: {self.width}')
         print(f'Height: {self.height}')
         print(f'Bit depth: {self.bit_depth}')
