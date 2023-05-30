@@ -9,5 +9,4 @@ def check_signature(byte_data):
     for i, byte in enumerate(signature):
         if byte_data[i] != byte:
             return False
-    print("PNG file detected.")
     return True

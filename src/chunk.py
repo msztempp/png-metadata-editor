@@ -5,6 +5,10 @@ class Chunk:
         self.crc = crc
 
     def print_basic_info(self):
-        print("Type: {chunk_type}".format(chunk_type=self.chunk_type))
+        print("Type: {type}".format(type=self.chunk_type))
         print("Length: {length} bytes".format(length=self.length))
         print("CRC: {crc}".format(crc=self.crc))
+
+    # TODO: implement this
+    def show_details(self):
+        print("To be implemented\n")

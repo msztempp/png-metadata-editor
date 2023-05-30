@@ -1,9 +1,11 @@
 import os
+
 from constants import *
 from chunk import Chunk
-from src.idat import IDAT
-from src.ihdr import IHDR
-from src.plte import PLTE
+from ihdr import IHDR
+from plte import PLTE
+from idat import IDAT
+from signature import check_signature
 
 
 def format_size(size_bytes):
@@ -19,75 +21,112 @@ def format_size(size_bytes):
         return f'{mega},{kilo} MB'
 
 
-def get_name(pathname):
-    file_name = os.path.basename(pathname)
-    return os.path.splitext(file_name)[0]
-
-
 class File:
     def __init__(self, pathname):
-        self.chunks_indices = None
+        self.file_name = None
+        self.chunk_type = None
         self.size = None
-        self.chunk_bytes = None
-        self.name = None
-        self.extension = 'PNG'
+        self.byte_data = None
+        self.chunks_indices = None
         self.chunks = {}
-        self.name = get_name(pathname)
+        self.get_name(pathname)
         self.load_data(pathname)
         self.find_chunks()
         self.init_chunks()
-        if self.chunks['IHDR'].color_type == 3:
-            self.chunks['IDAT'].apply_palette(self.chunks['PLTE'].palettes)
+        if self.chunks["IHDR"].color_type == 3:
+            self.chunks["IDAT"].apply_palette(self.chunks["PLTE"].palettes)
+
+    def get_name(self, pathname):
+        self.file_name = os.path.basename(pathname)
 
     def load_data(self, pathname):
-        self.name = get_name(pathname)
-        with open(pathname, 'rb') as png_file:
-            self.chunk_bytes = png_file.read()
-        self.size = len(self.chunk_bytes)
+        png_file = open(pathname, "rb")
+        self.byte_data = png_file.read()
+        if check_signature(self.byte_data):
+            print(f'{self.file_name} loaded correctly\n')
+        else:
+            print(f'{self.file_name} is not a png file!')
+            exit()
+        self.size = len(self.byte_data)
+        png_file.close()
+
+    def print_info(self):
+        print('File info:')
+        print("name:", self.file_name)
+        print("size: {formatted} ({bytes} bytes)".format(formatted=format_size(self.size), bytes=self.size))
+        print("chunks:")
+        for key in self.chunks_indices.keys():
+            for chunk in self.chunks_indices[key].keys():
+                print("  * {}".format(chunk))
+
+    # TODO - write this better
 
     def find_chunks(self):
-        found_chunks = {'Critical': {}, 'Ancillary': {}}
+        found_chunks = {"CRITICAL": {}, "ANCILLARY": {}}
         i = 0
-        while i < len(self.chunk_bytes):
-            chunk_type_bytes = self.chunk_bytes[i:i + 4]
-            chunk_type = chunk_type_bytes.decode('utf-8')
-            if chunk_type_bytes[0] in range(66, 90) and chunk_type in chunks_types:
-                found_chunks['Critical'][chunk_type] = i
+        while self.byte_data[i:i + 1]:
+            if 65 < self.byte_data[i] < 90 and self.byte_data[i:i + 4] in chunks_types:
+                chunk_type = self.byte_data[i:i + 4].decode("utf-8")
+                found_chunks["CRITICAL"][chunk_type] = i
                 i += 4
-            elif chunk_type_bytes[0] in range(98, 122) and chunk_type in chunks_types:
-                found_chunks['Ancillary'][chunk_type] = i
+            elif 97 < self.byte_data[i] < 122 and self.byte_data[i:i + 4] in chunks_types:
+                chunk_type = self.byte_data[i:i + 4].decode("utf-8")
+                found_chunks["ANCILLARY"][chunk_type] = i
                 i += 4
             else:
                 i += 1
         self.chunks_indices = found_chunks
 
-    def get_chunk_data(self, chunk_type, chunk_index):
-        switcher = {
-            'IHDR': lambda: IHDR(data_len, chunk_data, crc),
-            'PLTE': lambda: PLTE(data_len, chunk_data, crc, self.chunks['IHDR'].color_type),
-            'IDAT': lambda: IDAT(data_len, chunk_data, crc, self.chunks['IDAT'].width, self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
-        }
+    # def find_chunks(self):
+    #     found_chunks = {"CRITICAL": {}, "ANCILLARY": {}}
+    #     i = 0
+    #     while i < len(self.byte_data):
+    #         chunk_type = self.byte_data[i:i + 4].decode("utf-8")
+    #         if chunk_type in chunks_types:
+    #             if 65 < self.byte_data[i] < 90:
+    #                 found_chunks["CRITICAL"][chunk_type] = i
+    #             elif 97 < self.byte_data[i] < 122:
+    #                 found_chunks["ANCILLARY"][chunk_type] = i
+    #             i += 4
+    #         else:
+    #             i += 1
+    #     self.chunks_indices = found_chunks
 
-        if chunk_type == 'IEND':
-            self.chunks['IEND'] = Chunk(0, 'IEND', None)
+    def get_chunk_data(self, chunk_type, index):
+        if chunk_type == "IEND":
+            self.chunks["IEND"] = Chunk(0, "IEND", None)
         else:
-            data_len = int.from_bytes(self.chunk_bytes[chunk_index - 4:chunk_index], 'big')
-            chunk_data = self.chunk_bytes[chunk_index + 4:chunk_index + 4 + data_len]
-            crc = self.chunk_bytes[chunk_index + 4 + data_len:chunk_index + 8 + data_len]
+            length = int.from_bytes(self.byte_data[index - 4:index], "big")
+            index += 4
+            data = self.byte_data[index:index + length]
+            index += length
+            crc = self.byte_data[index:index + 4]
+            if chunk_type == "IHDR": 
+                self.chunks[chunk_type] = IHDR(length, data, crc)
+            elif chunk_type == "PLTE":
+                self.chunks[chunk_type] = PLTE(length, data, crc, self.chunks["IHDR"].color_type)
+            elif chunk_type == "IDAT":
+                self.chunks[chunk_type] = IDAT(length, data, crc, self.chunks["IHDR"].width, self.chunks["IHDR"].height, self.chunks["IHDR"].color_type)
+            else:
+                self.chunks[chunk_type] = Chunk(length, chunk_type, crc)
 
-            self.chunks[chunk_type] = switcher.get(chunk_type, lambda: Chunk(data_len, chunk_data, crc))()
+    # Write this better TODO
 
-    def file_info(self):
-        print('> NAME:', self.name)
-        print('> EXTENSION:', self.extension)
-        print('> SIZE: {formatted} ({bytes} bytes)'.format(formatted=format_size(self.size), bytes=self.size))
-        print('> CHUNKS: ')
-        for key, chunks in self.chunks_indices.items():
-            print('  ', end='')
-            print(' {} '.format(key).center(50, '-'))
-            for chunk_type in chunks:
-                print('  * {}'.format(chunk_type))
-        print()
+    # def get_chunk_data(self, chunk_type, index):
+    #     if chunk_type == "IEND":
+    #         self.chunks["IEND"] = Chunk(0, "IEND", None)
+    #     else:
+    #         length = int.from_bytes(self.byte_data[index - 4:index], "big")
+    #         index += 4
+    #         data = self.byte_data[index:index + length]
+    #         index += length
+    #         crc = self.byte_data[index:index + 4]
+    #         switcher = {
+    #             "IHDR": IHDR(length, data, crc),
+    #             "PLTE": PLTE(length, data, crc, self.chunks["IHDR"].color_type),
+    #             "IDAT": IDAT(length, data, crc, self.chunks["IHDR"].width, self.chunks["IHDR"].height, self.chunks["IHDR"].color_type)
+    #         }
+    #         self.chunks[chunk_type] = switcher.get(chunk_type, Chunk(length, chunk_type, crc))
 
     def init_chunks(self):
         for key, chunks in self.chunks_indices.items():
@@ -95,5 +134,5 @@ class File:
                 self.get_chunk_data(chunk_type, chunk_index)
 
     def print_chunks(self):
-        for chunk_type, chunk in self.chunks.items():
-            chunk.print_info()
+        for chunk in self.chunks.values():
+            chunk.print_basic_info()
