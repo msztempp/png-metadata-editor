@@ -1,6 +1,7 @@
-from chunk import Chunk
 import numpy as np
 import matplotlib.pyplot as plt
+
+from src.chunk import Chunk
 
 
 def init_palette():
@@ -24,15 +25,15 @@ class PLTE(Chunk):
         super().__init__(raw_bytes)
         self.entries = self.length // 3
         self.required = color_type == 3
-        self.palettes = [tuple(self.data[i:i+3]) for i in range(0, self.length, 3)]
+        self.palettes = [(self.data[i], self.data[i + 1], self.data[i + 2]) for i in range(0, self.length, 3)]
 
     def plot_palettes(self):
         width = 1
         fig, ax = plt.subplots(1, 1)
-        ax.bar(range(self.entries), [1]*self.entries, width=width, color=[translate_RGB(rgb) for rgb in self.palettes])
+        ax.bar(np.arange(self.entries), np.ones(self.entries), width=width, color=[translate_RGB(rgb) for rgb in self.palettes])
         ax.set_xlim(0, self.entries)
         ax.set_ylim(0, 1)
-        ax.set_xticks(range(self.entries))
+        ax.set_xticks(np.arange(self.entries))
         ax.set_yticks([])
         fig.tight_layout()
         fig.canvas.set_window_title('Palettes')

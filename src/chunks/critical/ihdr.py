@@ -11,19 +11,18 @@ class IHDR(Chunk):
         'default': 'Not found'
     }
 
-    def __init__(self, chunk_byes):
-        super().__init__(chunk_byes)
-        self.analyse()
-
+    def __init__(self, chunk_bytes):
+        super().__init__(chunk_bytes)
         self.length = None
         self.data = None
-        self.compression_method = None
         self.width = None
         self.height = None
         self.bit_depth = None
         self.color_type = None
+        self.compression_method = None
         self.filter_method = None
         self.interlace_method = None
+        self.analyse()
 
     def print_ihdr_info(self):
         print(f'Width: {self.width}')
@@ -36,7 +35,7 @@ class IHDR(Chunk):
 
     def analyse(self):
         if self.length != 13:
-            raise ValueError('IHDR chunks length is invalid')
+            raise ValueError('IHDR chunk length is invalid')
         self.width = int.from_bytes(self.data[:4], 'big')
         self.height = int.from_bytes(self.data[4:8], 'big')
         self.bit_depth = int.from_bytes(self.data[8:9], 'big')

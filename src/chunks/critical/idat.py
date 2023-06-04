@@ -1,18 +1,17 @@
-from chunk import Chunk
 import zlib
 import matplotlib.pyplot as plt
 import numpy as np
+from src.chunk import Chunk
 
 
 def byte_per_pixel(color_type):
-    switcher = {
+    return {
         0: 1,
         2: 3,
         3: 1,
         4: 2,
         6: 4,
-    }
-    return switcher.get(color_type, 'Not found')
+    }.get(color_type, 'Not found')
 
 
 def paeth_predictor(a, b, c):
@@ -33,9 +32,6 @@ class IDAT(Chunk):
     def __init__(self, init_data, width, height, color_type):
         self.recon_data = None
         super().__init__(chunk_list=init_data) if isinstance(init_data, list) else super().__init__(chunk_bytes=init_data)
-        if isinstance(self.data, list):
-            self.length = sum(self.length)
-            self.data = b''.join(self.data)
         self.width = width
         self.height = height
         self.color_type = color_type
@@ -46,30 +42,25 @@ class IDAT(Chunk):
         self.data = zlib.decompress(self.data)
         self.recon_data = []
         stride = self.width * self.bytes_per_pixel
-        i = 0
-        for r in range(self.height):
+        for i, filt_x in enumerate(self.data[1:], start=1):
             filter_type = self.data[i]
-            i += 1
-            for c in range(stride):
-                filt_x = self.data[i]
-                i += 1
-                if filter_type == 0:  # None
-                    recon_x = filt_x
-                elif filter_type == 1:  # Sub
-                    recon_x = filt_x + self.recon_a(r, c, stride)
-                elif filter_type == 2:  # Up
-                    recon_x = filt_x + self.recon_b(r, c, stride)
-                elif filter_type == 3:  # Average
-                    recon_x = filt_x + (self.recon_a(r, c, stride) + self.recon_b(r, c, stride)) // 2
-                elif filter_type == 4:  # Paeth
-                    recon_x = filt_x + paeth_predictor(
-                        self.recon_a(r, c, stride),
-                        self.recon_b(r, c, stride),
-                        self.recon_c(r, c, stride)
-                    )
-                else:
-                    raise Exception('Unknown filter type: ' + str(filter_type))
-                self.recon_data.append(recon_x & 0xff)  # truncation to byte
+            if filter_type == 0:  # None
+                recon_x = filt_x
+            elif filter_type == 1:  # Sub
+                recon_x = filt_x + self.recon_a(i // stride, i % stride, stride)
+            elif filter_type == 2:  # Up
+                recon_x = filt_x + self.recon_b(i // stride, i % stride, stride)
+            elif filter_type == 3:  # Average
+                recon_x = filt_x + (self.recon_a(i // stride, i % stride, stride) + self.recon_b(i // stride, i % stride, stride)) // 2
+            elif filter_type == 4:  # Paeth
+                recon_x = filt_x + paeth_predictor(
+                    self.recon_a(i // stride, i % stride, stride),
+                    self.recon_b(i // stride, i % stride, stride),
+                    self.recon_c(i // stride, i % stride, stride)
+                )
+            else:
+                raise Exception('Unknown filter type: ' + str(filter_type))
+            self.recon_data.append(recon_x & 0xff)  # truncation to byte
 
     def recon_a(self, r, c, stride):
         return self.recon_data[r * stride + c - self.bytes_per_pixel] if c >= self.bytes_per_pixel else 0
@@ -86,10 +77,8 @@ class IDAT(Chunk):
         fig, ax = plt.subplots(1, 1)
         if bytes_per_pixel is None:
             bytes_per_pixel = self.bytes_per_pixel
-        if bytes_per_pixel == 1:
-            ax.imshow(np.array(data).reshape((self.height, self.width)), cmap='gray')
-        else:
-            ax.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
+        cmap = 'gray' if bytes_per_pixel == 1 else None
+        ax.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)), cmap=cmap)
         ax.set_axis_off()
         ax.set_facecolor('whitesmoke')
         fig.patch.set_facecolor('whitesmoke')

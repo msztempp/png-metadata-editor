@@ -23,7 +23,7 @@ def format_size(size_bytes):
         return f'{mega},{kilo} MB'
 
 
-class File:
+class PNGFILE:
     def __init__(self, pathname):
         self.chunks_indices = None
         self.size = None
@@ -149,3 +149,6 @@ class File:
                 chunk_data = self.get_chunk_data(instance_index)
                 tmp_png.write(chunk_data)
         print("saved only with critical chunks: ", new_file_name)
+
+    def perform_fft(self):
+        print('Performing FFT...')

@@ -30,5 +30,5 @@ class Chunk:
         print('Length:', self.length, 'chunk_bytes')
         print('CRC:', self.crc)
 
-    def show_details(self):
-        print('To be implemented\n')
+    def details(self):
+        print('To be implemented')
