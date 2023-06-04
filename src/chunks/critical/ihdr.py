@@ -11,8 +11,12 @@ class IHDR(Chunk):
         'default': 'Not found'
     }
 
-    def __init__(self, length, data, crc):
-        super().__init__(length, 'IHDR', crc)
+    def __init__(self, chunk_byes):
+        super().__init__(chunk_byes)
+        self.analyse()
+
+        self.length = None
+        self.data = None
         self.compression_method = None
         self.width = None
         self.height = None
@@ -20,10 +24,8 @@ class IHDR(Chunk):
         self.color_type = None
         self.filter_method = None
         self.interlace_method = None
-        self.analyse(data)
 
-    def print_info(self):
-        self.show_details()
+    def print_ihdr_info(self):
         print(f'Width: {self.width}')
         print(f'Height: {self.height}')
         print(f'Bit depth: {self.bit_depth}')
@@ -32,15 +34,13 @@ class IHDR(Chunk):
         print(f'Filter method: {self.filter_method}')
         print(f'Interlace method: {self.interlace_method}')
 
-    def analyse(self, data):
+    def analyse(self):
         if self.length != 13:
             raise ValueError('IHDR chunks length is invalid')
-        self.width = int.from_bytes(data[:4], 'big')
-        self.height = int.from_bytes(data[4:8], 'big')
-        self.bit_depth = int.from_bytes(data[8:9], 'big')
-        self.color_type = int.from_bytes(data[9:10], 'big')
-        self.compression_method = int.from_bytes(data[10:11], 'big')
-        self.filter_method = IHDR.FILTER_METHODS.get(int.from_bytes(data[11:12], 'big'), IHDR.FILTER_METHODS['default'])
-        self.interlace_method = 'No interlace' if int.from_bytes(data[12:13], 'big') == 0 else 'Adam7 interlace'
-
-
+        self.width = int.from_bytes(self.data[:4], 'big')
+        self.height = int.from_bytes(self.data[4:8], 'big')
+        self.bit_depth = int.from_bytes(self.data[8:9], 'big')
+        self.color_type = int.from_bytes(self.data[9:10], 'big')
+        self.compression_method = int.from_bytes(self.data[10:11], 'big')
+        self.filter_method = IHDR.FILTER_METHODS.get(int.from_bytes(self.data[11:12], 'big'), IHDR.FILTER_METHODS['default'])
+        self.interlace_method = 'No interlace' if int.from_bytes(self.data[12:13], 'big') == 0 else 'Adam7 interlace'
