@@ -16,48 +16,31 @@ def translate(value, from_min, from_max, to_min, to_max):
 
 
 def translate_RGB(rgb_tuple):
-    return (
-        translate(rgb_tuple[0], 0, 255, 0, 1),
-        translate(rgb_tuple[1], 0, 255, 0, 1),
-        translate(rgb_tuple[2], 0, 255, 0, 1)
-    )
+    return tuple(translate(value, 0, 255, 0, 1) for value in rgb_tuple)
 
 
 class PLTE(Chunk):
     def __init__(self, raw_bytes, color_type=3):
         super().__init__(raw_bytes)
         self.entries = self.length // 3
-        self.required = True if color_type == 3 else False
-        self.palettes = [(self.data[i], self.data[i + 1], self.data[i + 2]) for i in range(0, self.length, 3)]
-
-
-    def fill_palette(self, data):
-        for i in range(0, self.length, 3):
-            self.palette['Red'][data[i]] += 1
-            self.palette['Green'][data[i + 1]] += 1
-            self.palette['Blue'][data[i + 2]] += 1
-
-    def print_palette(self):
-        print('Palette:')
-        for color, values in self.palette.items():
-            print(f'   {color}:')
-            for key, value in enumerate(values):
-                if value == 0:
-                    continue
-                print(f'{key}: {value}')
+        self.required = color_type == 3
+        self.palettes = [tuple(self.data[i:i+3]) for i in range(0, self.length, 3)]
 
     def plot_palettes(self):
+        width = 1
         fig, ax = plt.subplots(1, 1)
+        ax.bar(range(self.entries), [1]*self.entries, width=width, color=[translate_RGB(rgb) for rgb in self.palettes])
         ax.set_xlim(0, self.entries)
         ax.set_ylim(0, 1)
-        for i in range(self.entries):
-            ax.bar(i, 1, width=1, color=translate_RGB(self.palettes[i]))
-        ax.set_axis_off()
+        ax.set_xticks(range(self.entries))
+        ax.set_yticks([])
         fig.tight_layout()
         fig.canvas.set_window_title('Palettes')
-        plt.show()
+        plt.draw()
+        plt.pause(0.001)
 
-    def print_info(self):
+    def details(self):
         self.print_basic_info()
-
-
+        print('entries:', self.entries)
+        print('required:', self.required)
+        self.plot_palettes()
