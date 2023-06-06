@@ -1,15 +1,15 @@
 class Chunk:
-    def __init__(self, chunk_bytes=None, chunk_list=None):
+    def __init__(self, chunk_bytes=None, is_chunk_list=None):
 
         self.crc = None
         self.data = None
         self.chunk_type = None
         self.length = None
 
-        if chunk_bytes and not chunk_list:
+        if chunk_bytes and not is_chunk_list:
             self.single_chunk_init(chunk_bytes)
-        elif not chunk_bytes and chunk_list:
-            self.multiple_chunk_init(chunk_list)
+        elif not chunk_bytes and is_chunk_list:
+            self.multiple_chunk_init(is_chunk_list)
         else:
             raise Exception('Invalid input')
 

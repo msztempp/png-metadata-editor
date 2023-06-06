@@ -1,80 +1,49 @@
-import re
+import os.path
 
-from constants import *
 from chunk import Chunk
-from src.chunks.anicillary.text import TEXT
-from src.chunks.anicillary.trns import TRNS
 from src.chunks.critical.ihdr import IHDR
 from src.chunks.critical.plte import PLTE
 from src.chunks.critical.idat import IDAT
-from signature import check_signature
 
 
-def format_size(size_bytes):
-    if size_bytes < KILO:
-        return f'{size_bytes} B'
-    elif size_bytes < MEGA:
-        kilo = size_bytes / KILO
-        chunk_bytes = size_bytes % KILO
-        return f'{kilo},{chunk_bytes} B'
-    elif size_bytes < GIGA:
-        mega = size_bytes // MEGA
-        kilo = (size_bytes % MEGA) // KILO
-        return f'{mega},{kilo} MB'
-
-
-class PNGFILE:
+class FilePNG:
     def __init__(self, pathname):
         self.chunks_indices = None
-        self.size = None
         self.byte_data = None
-        self.file_name = None
-        self.extension = "PNG"
+        self.name = None
         self.chunks = {}
-        self.pathname = pathname
-        self.get_name(pathname)
-        self.load_data(pathname)
+        self.load_and_get_name(pathname)
         self.find_chunks()
         self.init_chunks()
 
-    def get_name(self, pathname):
+    def load_and_get_name(self, pathname):
         pathname = pathname.lower()
-        full_file_name = re.search(r'\w+\.png', pathname)
-        self.file_name = full_file_name.group(0)[:-4]
+        filename = os.path.basename(pathname)
+        self.name = filename
 
-    def load_data(self, pathname):
-        png_file = open(pathname, "rb")
+        png_file = open(pathname, 'rb')
         self.byte_data = png_file.read()
-        if check_signature(self.byte_data):
-            print(f'{self.file_name} loaded correctly\n')
-        else:
-            print(f'{self.file_name} is not a png file!')
-            exit()
-        self.size = len(self.byte_data)
+        if not check_signature(self.byte_data):
+            raise Exception('Incorrect file format\nThis program is strictly for analyzing PNG files.')
         png_file.close()
 
-    def print_info(self):
-        print('File info:')
-        print("name:", self.file_name)
-        print("size: {formatted} ({bytes} bytes)".format(formatted=format_size(self.size), bytes=self.size))
-        print("chunks:")
-        for key in self.chunks_indices.keys():
-            for chunk in self.chunks_indices[key].keys():
-                print("  * {}".format(chunk))
-
-    # TODO - write this better
-
     def find_chunks(self):
-        found_chunks = {"CRITICAL": {}, "ANCILLARY": {}}
+        found_chunks = {'critical': {}, 'ancillary': {}}
         i = 0
         while self.byte_data[i:i + 1]:
             if 65 < self.byte_data[i] < 90 and self.byte_data[i:i + 4] in chunks_types:
-                chunk_type = self.byte_data[i:i + 4].decode("utf-8")
-                found_chunks["CRITICAL"][chunk_type] = i
+                chunk_type = self.byte_data[i:i + 4].decode('utf-8')
+                if chunk_type in found_chunks['critical'].keys():
+                    found_chunks['critical'][chunk_type].append(i - 4)
+                else:
+                    found_chunks['critical'][chunk_type] = [i - 4]
                 i += 4
             elif 97 < self.byte_data[i] < 122 and self.byte_data[i:i + 4] in chunks_types:
-                chunk_type = self.byte_data[i:i + 4].decode("utf-8")
-                found_chunks["ANCILLARY"][chunk_type] = i
+                chunk_type = self.byte_data[i:i + 4].decode('utf-8')
+                if chunk_type in found_chunks['ancillary'].keys():
+                    found_chunks['ancillary'][chunk_type].append(i - 4)
+                else:
+                    found_chunks['ancillary'][chunk_type] = [i - 4]
                 i += 4
             else:
                 i += 1
@@ -82,8 +51,8 @@ class PNGFILE:
 
     def get_chunk_data(self, index):
         start = index
-        length = int.from_bytes(self.byte_data[start:start + 4], "big")
-        end = index + length + 12
+        length = int.from_bytes(self.byte_data[start:start + 4], 'big')
+        end = start + length + 12
         return self.byte_data[start:end]
 
     def get_chunks(self):
@@ -99,56 +68,60 @@ class PNGFILE:
 
     def init_chunks(self):
         self.get_chunks()  # init self.chunks with raw_bytes
-        for chunk_type in self.chunks.keys():  # this loop inits chunks
-            if chunk_type == "IHDR":
-                self.chunks[chunk_type] = IHDR(self.chunks[chunk_type])
-            elif chunk_type == "PLTE":
-                self.chunks[chunk_type] = PLTE(self.chunks[chunk_type], self.chunks["IHDR"].color_type)
-            elif chunk_type == "IDAT":
-                if type(self.chunks[chunk_type]) == list:
-                    for i in range(len(self.chunks[chunk_type])):
-                        self.chunks[chunk_type][i] = Chunk(self.chunks[chunk_type][i])
-                    self.chunks[chunk_type] = IDAT(self.chunks[chunk_type],
-                                                   self.chunks["IHDR"].width,
-                                                   self.chunks["IHDR"].height,
-                                                   self.chunks["IHDR"].color_type)
+        for chunk_type, chunk_value in self.chunks.items():
+            if chunk_type == 'IHDR':
+                self.chunks[chunk_type] = IHDR(chunk_value)
+            elif chunk_type == 'PLTE':
+                self.chunks[chunk_type] = PLTE(chunk_value, self.chunks['IHDR'].color_type)
+            elif chunk_type == 'IDAT':
+                if isinstance(chunk_value, list):
+                    self.chunks[chunk_type] = [Chunk(chunk) for chunk in chunk_value]
+                    self.chunks[chunk_type] = IDAT(self.chunks[chunk_type], self.chunks['IHDR'].width,
+                                                   self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
                 else:
-                    self.chunks[chunk_type] = IDAT(self.chunks[chunk_type],
-                                                   self.chunks["IHDR"].width,
-                                                   self.chunks["IHDR"].height,
-                                                   self.chunks["IHDR"].color_type)
-            elif chunk_type == "tRNS":
-                self.chunks[chunk_type] = TRNS(self.chunks[chunk_type],
-                                               self.chunks["IHDR"].color_type,
-                                               self.chunks["IHDR"].bit_depth)
-            elif chunk_type == "tEXt":
-                if type(self.chunks[chunk_type]) == list:
-                    for i in range(len(self.chunks[chunk_type])):
-                        self.chunks[chunk_type][i] = Chunk(self.chunks[chunk_type][i])
-                    self.chunks[chunk_type] = TEXT(self.chunks[chunk_type])
-                else:
-                    self.chunks[chunk_type] = TEXT(self.chunks[chunk_type])
+                    self.chunks[chunk_type] = IDAT(chunk_value, self.chunks['IHDR'].width,
+                                                   self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
             else:
-                if type(self.chunks[chunk_type]) == list:
-                    for i in range(len(self.chunks[chunk_type])):
-                        self.chunks[chunk_type][i] = Chunk(self.chunks[chunk_type][i])
-                    self.chunks[chunk_type] = Chunk(chunk_list=self.chunks[chunk_type])
+                if isinstance(chunk_value, list):
+                    self.chunks[chunk_type] = [Chunk(chunk) for chunk in chunk_value]
+                    self.chunks[chunk_type] = Chunk(is_chunk_list=self.chunks[chunk_type])
                 else:
-                    self.chunks[chunk_type] = Chunk(self.chunks[chunk_type])
+                    self.chunks[chunk_type] = Chunk(chunk_value)
 
     def print_chunks(self):
         for chunk in self.chunks.values():
             chunk.print_basic_info()
 
     def print_to_file(self):
-        new_file_name = "../png_files/{}_crit.png".format(self.file_name)
-        tmp_png = open(new_file_name, "wb")
+        folder_path = '../img-anonymized'
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        new_name = os.path.join(folder_path, '{}_anonymized.png'.format(self.name))
+        tmp_png = open(new_name, 'wb')
         tmp_png.write(self.byte_data[:8])
-        for chunk_type in self.chunks_indices["CRITICAL"].values():
+        for chunk_type in self.chunks_indices['CRITICAL'].values():
             for instance_index in chunk_type:
                 chunk_data = self.get_chunk_data(instance_index)
                 tmp_png.write(chunk_data)
-        print("saved only with critical chunks: ", new_file_name)
+        print('Saved only with critical chunks to: ', new_name)
+        tmp_png.close()
 
     def perform_fft(self):
-        print('Performing FFT...')
+        pass
+
+
+# https://www.w3.org/TR/png/#5PNG-file-signature
+# The first eight bytes of a PNG datastream always contain the following (decimal) values:
+def check_signature(chunk_byte):
+    signature = [137, 80, 78, 71, 13, 10, 26, 10]  # PNG signature
+
+    for i, byte in enumerate(signature):
+        if chunk_byte[i] != byte:
+            return False
+    return True
+
+
+chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND',
+                b'cHRM', b'gAMA', b'iCCP', b'sBIT', b'sRGB', b'bKGD', b'hIST', b'tRNS', 'pHYs',
+                b'sPLT', b'tIME', b'iTXt', b'tEXt', b'zTXt']

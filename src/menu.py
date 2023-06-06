@@ -1,93 +1,124 @@
-from chunk_data import File
-
-
-def main_options():
-    print('Main Menu')
-    print('1 - Load File')
-    print('Q - Quit')
+import os
+from glob import glob
+from os import system, name
+from matplotlib import pyplot as plt
+from chunk_data import FilePNG
 
 
 class Menu:
     def __init__(self):
-        self.active_options = None
+        self.file_menu = None
+        self.file_list = None
+        self.pathname = None
         self.original_file = None
+        self.choice = None
+        self.active_menu = self.menu_main
+        self.active_options = self.main_options
+
+    def set_file_list(self, dir_path):
+        self.file_list = glob(dir_path + '*')
+
+    def start(self):
+        plt.ion()
+        plt.show()
+        self.set_file_list('../img-example/')
+        while self.choice != 'q' and self.choice != 'Q':  # Use 'and' instead of 'or' for the condition
+            self.active_options()
+            self.active_menu()
+
+    def main_options(self):
+        print('Choose a file to work with:')
+        for i, file in enumerate(self.file_list, 1):
+            base_name = os.path.basename(file)
+            extension = os.path.splitext(base_name)[1]
+            file_name = os.path.splitext(base_name)[0]
+            print('{} - {}{}'.format(i, file_name, extension))
+        print('q - quit\n')
 
     @staticmethod
     def file_options():
-        print('File Menu:')
-        print('1 - Print basic info')
-        print('2 - Print chunks')
-        print('3 - Chunks menu')
-        print('B - Back to main menu')
-        print('Q - Quit')
+        print('Choose option to perform')
+        print('1 - print all chunks')
+        print('2 - go to chunk details')
+        print('3 - save a new file with only critical chunks')
+        print('b - go back')
+        print('q - quit')
+
+    def chunks_options(self):
+        print('Choose chunk to show details\n')
+        for i, chunk in enumerate(self.original_file.chunks.keys(), 1):
+            print('{}- {} details.'.format(i, chunk))
+        print('b - go back')
+        print('q - quit')
 
     @staticmethod
-    def chunks_options():
-        print('Chunks Menu')
-        print('Enter the number of the chunk to view details')
-        print('B - Back to file menu')
-        print('Q - Quit')
+    def invalid_option(*args):
+        print('Invalid option! Try again.')
 
-    @staticmethod
-    def invalid_option():
-        print('Invalid option!')
+    def load_file(self, pathname):
+        self.pathname = pathname
+        self.original_file = FilePNG(self.pathname)
+        clear_terminal()
+        print('Successfully loaded: {}'.format(self.original_file.name))
 
-    def start(self):
-        while True:
-            main_options()
-            choice = input('Enter your choice: ').lower()
+    def menu_main(self):
+        def load_file(choice):
+            self.load_file(self.file_list[int(choice) - 1])
+            self.active_menu = self.menu_file  # Update the active_menu attribute
+            self.active_options = Menu.file_options
 
-            if choice == '1':
-                self.load_file()
-                self.file_menu()
-            elif choice == 'q':
-                break
-            else:
-                Menu.invalid_option()
+        switch = {
+            'f': load_file,
+            'q': exit,
+        }
+        for i, file in enumerate(self.file_list, 1):
+            switch[str(i)] = load_file
+        choice = input('').lower()
+        clear_terminal()
+        switch.get(choice, Menu.invalid_option)(choice)
 
-    def file_menu(self):
-        self.active_options = self.file_options
-        while True:
-            self.active_options()
-            choice = input('Enter your choice: ').lower()
+    def menu_file(self):
+        def go_back():
+            self.original_file = None
+            self.active_menu = self.menu_main
+            self.active_options = self.main_options
 
-            if choice == '1':
-                self.original_file.print_info()
-            elif choice == '2':
-                self.original_file.print_chunks()
-            elif choice == '3':
-                self.chunks_menu()
-            elif choice == 'b':
-                break
-            elif choice == 'q':
-                exit()
-            else:
-                Menu.invalid_option()
+        def switch_chunks_menu():
+            self.active_menu = self.menu_chunk
+            self.active_options = self.chunks_options
 
-    def chunks_menu(self):
-        self.active_options = self.chunks_options
-        while True:
-            self.active_options()
-            choice = input('Enter your choice: ').lower()
+        switch = {
+            '1': self.original_file.print_chunks,
+            '2': switch_chunks_menu,
+            '3': self.original_file.print_to_file,
+            '4': self.original_file.perform_fft,
+            'b': go_back,
+            'q': exit,
+        }
+        choice = input('').lower()
+        clear_terminal()
+        switch.get(choice, Menu.invalid_option)()
 
-            if choice == 'b':
-                break
-            elif choice == 'q':
-                exit()
-            else:
-                if choice.isdigit():
-                    index = int(choice) - 1
-                    if 0 <= index < len(self.original_file.chunks):
-                        chunk = list(self.original_file.chunks.values())[index]
-                        chunk.show_details()
-                    else:
-                        self.invalid_option()
-                else:
-                    self.invalid_option()
-        self.active_menu()
+    def menu_chunk(self):
+        def go_back():
+            self.active_menu = self.menu_file
+            self.active_options = Menu.file_options
 
-    def load_file(self):
-        self.original_file = File('../img-example/1.png')
+        switch = {
+            'b': go_back,
+            'q': exit,
+        }
+        for i, chunk in enumerate(self.original_file.chunks.values(), 1):
+            switch[str(i)] = chunk.details
+        choice = input('').lower()
+        switch.get(choice, Menu.invalid_option)()
 
-    def active_menu(self):
-        pass
+
+def clear_terminal():
+    # for windows the name is 'nt'
+    if name == 'nt':
+        _ = system('cls')
+
+    # and for mac and linux, the os.name is 'posix'
+    else:
+        _ = system('clear')

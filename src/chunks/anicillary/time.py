@@ -1,5 +1,5 @@
 from src.chunk import Chunk
 
 
-class TEXT(Chunk):
+class TIME(Chunk):
     pass
