@@ -27,6 +27,8 @@ class FilePNG:
             raise Exception('Incorrect file format\nThis program is strictly for analyzing PNG files.')
         png_file.close()
 
+    ####### TODO: make it more efficient
+
     def find_chunks(self):
         found_chunks = {'critical': {}, 'ancillary': {}}
         i = 0
@@ -67,7 +69,8 @@ class FilePNG:
                         self.chunks[chunk_type] = self.get_chunk_data(instance_index)
 
     def init_chunks(self):
-        self.get_chunks()  # init self.chunks with raw_bytes
+        self.get_chunks()  # Initialize self.chunks with raw_bytes
+
         for chunk_type, chunk_value in self.chunks.items():
             if chunk_type == 'IHDR':
                 self.chunks[chunk_type] = IHDR(chunk_value)
@@ -75,16 +78,16 @@ class FilePNG:
                 self.chunks[chunk_type] = PLTE(chunk_value, self.chunks['IHDR'].color_type)
             elif chunk_type == 'IDAT':
                 if isinstance(chunk_value, list):
-                    self.chunks[chunk_type] = [Chunk(chunk) for chunk in chunk_value]
-                    self.chunks[chunk_type] = IDAT(self.chunks[chunk_type], self.chunks['IHDR'].width,
+                    chunk_list = [Chunk(chunk) for chunk in chunk_value]
+                    self.chunks[chunk_type] = IDAT(chunk_list, self.chunks['IHDR'].width,
                                                    self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
                 else:
                     self.chunks[chunk_type] = IDAT(chunk_value, self.chunks['IHDR'].width,
                                                    self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
             else:
                 if isinstance(chunk_value, list):
-                    self.chunks[chunk_type] = [Chunk(chunk) for chunk in chunk_value]
-                    self.chunks[chunk_type] = Chunk(is_chunk_list=self.chunks[chunk_type])
+                    chunk_list = [Chunk(chunk) for chunk in chunk_value]
+                    self.chunks[chunk_type] = Chunk(is_chunk_list=chunk_list)
                 else:
                     self.chunks[chunk_type] = Chunk(chunk_value)
 
@@ -100,7 +103,7 @@ class FilePNG:
         new_name = os.path.join(folder_path, '{}_anonymized.png'.format(self.name))
         tmp_png = open(new_name, 'wb')
         tmp_png.write(self.byte_data[:8])
-        for chunk_type in self.chunks_indices['CRITICAL'].values():
+        for chunk_type in self.chunks_indices['critical'].values():
             for instance_index in chunk_type:
                 chunk_data = self.get_chunk_data(instance_index)
                 tmp_png.write(chunk_data)

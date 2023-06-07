@@ -2,7 +2,7 @@ import os
 from glob import glob
 from os import system, name
 from matplotlib import pyplot as plt
-from chunk_data import FilePNG
+from file_png import FilePNG
 
 
 class Menu:
