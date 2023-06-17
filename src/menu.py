@@ -2,8 +2,7 @@ import os
 from glob import glob
 from os import system, name
 from matplotlib import pyplot as plt
-from file_png import FilePNG
-# from fft import perform_fft
+from file import File
 
 
 class Menu:
@@ -59,7 +58,7 @@ class Menu:
 
     def load_file(self, pathname):
         self.pathname = pathname
-        self.original_file = FilePNG(self.pathname)
+        self.original_file = File(self.pathname)
         clear_terminal()
         print('Successfully loaded: {}'.format(self.original_file.name))
 

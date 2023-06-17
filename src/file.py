@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-class FilePNG:
+class File:
     def __init__(self, pathname):
         self.chunks_indices = None
         self.byte_data = None
