@@ -4,6 +4,7 @@ from src.chunks.critical.ihdr import IHDR
 from src.chunks.critical.plte import PLTE
 from src.chunks.critical.idat import IDAT
 from src.chunks.critical.iend import IEND
+from src.chunks.anicillary.gama import GAMMA
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -74,6 +75,8 @@ class File:
                 self.chunks[chunk_type] = PLTE(chunk_value, self.chunks['IHDR'].color_type)
             elif chunk_type == 'IEND':
                 self.chunks[chunk_type] = IEND(chunk_value)
+            elif chunk_type == 'gAMA':
+                self.chunks[chunk_type] = GAMMA(chunk_value)
             elif chunk_type == 'IDAT':
                 if isinstance(chunk_value, list):
                     chunk_list = [Chunk(chunk) for chunk in chunk_value]
@@ -150,4 +153,4 @@ def check_signature(chunk_byte):
     return True
 
 
-chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND']
+chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA']
