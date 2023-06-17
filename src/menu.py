@@ -3,6 +3,7 @@ from glob import glob
 from os import system, name
 from matplotlib import pyplot as plt
 from file_png import FilePNG
+# from fft import perform_fft
 
 
 class Menu:
@@ -41,6 +42,7 @@ class Menu:
         print('1 - print all chunks')
         print('2 - go to chunk details')
         print('3 - save a new file with only critical chunks')
+        print('4 - perform fft')
         print('b - go back')
         print('q - quit')
 

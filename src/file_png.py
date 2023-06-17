@@ -4,6 +4,9 @@ from chunk import Chunk
 from src.chunks.critical.ihdr import IHDR
 from src.chunks.critical.plte import PLTE
 from src.chunks.critical.idat import IDAT
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
 
 
 class FilePNG:
@@ -11,6 +14,7 @@ class FilePNG:
         self.chunks_indices = None
         self.byte_data = None
         self.name = None
+        self.pathname = pathname
         self.chunks = {}
         self.load_and_get_name(pathname)
         self.find_chunks()
@@ -111,7 +115,32 @@ class FilePNG:
         tmp_png.close()
 
     def perform_fft(self):
-        pass
+        img = cv2.imread(self.pathname)
+
+        # Split channels
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        blue_channel, green_channel, red_channel = cv2.split(img)
+
+        # Compute and display DFT magnitude and phase for each channel
+        channels = [(gray, 'Gray'), (red_channel, 'Red'), (green_channel, 'Green'), (blue_channel, 'Blue')]
+        for channel, channel_name in channels:
+            # Compute DFT
+            img_float32 = np.float32(channel)
+            dft = cv2.dft(img_float32, flags=cv2.DFT_COMPLEX_OUTPUT)
+            dft_shift = np.fft.fftshift(dft)
+
+            # Compute magnitude and phase
+            magnitude_spectrum, phase_spectrum = 20 * np.log(cv2.cartToPolar(dft_shift[:, :, 0], dft_shift[:, :, 1]))
+
+            # Display magnitude and phase
+            plt.figure(channel_name + " channel")
+            plt.subplot(121), plt.imshow(magnitude_spectrum, cmap='gray')
+            plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+            plt.subplot(122), plt.imshow(phase_spectrum, cmap='gray')
+            plt.title('Phase Spectrum'), plt.xticks([]), plt.yticks([])
+            plt.show()
+
+        cv2.waitKey(0)
 
 
 # https://www.w3.org/TR/png/#5PNG-file-signature
