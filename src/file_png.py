@@ -1,9 +1,9 @@
 import os.path
-
 from chunk import Chunk
 from src.chunks.critical.ihdr import IHDR
 from src.chunks.critical.plte import PLTE
 from src.chunks.critical.idat import IDAT
+from src.chunks.critical.iend import IEND
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
@@ -31,25 +31,17 @@ class FilePNG:
             raise Exception('Incorrect file format\nThis program is strictly for analyzing PNG files.')
         png_file.close()
 
-    ####### TODO: make it more efficient
-
     def find_chunks(self):
         found_chunks = {'critical': {}, 'ancillary': {}}
         i = 0
         while self.byte_data[i:i + 1]:
-            if 65 < self.byte_data[i] < 90 and self.byte_data[i:i + 4] in chunks_types:
-                chunk_type = self.byte_data[i:i + 4].decode('utf-8')
-                if chunk_type in found_chunks['critical'].keys():
-                    found_chunks['critical'][chunk_type].append(i - 4)
+            chunk_type_bytes = self.byte_data[i:i + 4]
+            if chunk_type_bytes in chunks_types:
+                chunk_type_str = chunk_type_bytes.decode('utf-8')
+                if chunk_type_str in found_chunks['critical'].keys():
+                    found_chunks['critical'][chunk_type_str].append(i - 4)
                 else:
-                    found_chunks['critical'][chunk_type] = [i - 4]
-                i += 4
-            elif 97 < self.byte_data[i] < 122 and self.byte_data[i:i + 4] in chunks_types:
-                chunk_type = self.byte_data[i:i + 4].decode('utf-8')
-                if chunk_type in found_chunks['ancillary'].keys():
-                    found_chunks['ancillary'][chunk_type].append(i - 4)
-                else:
-                    found_chunks['ancillary'][chunk_type] = [i - 4]
+                    found_chunks['critical'][chunk_type_str] = [i - 4]
                 i += 4
             else:
                 i += 1
@@ -80,6 +72,8 @@ class FilePNG:
                 self.chunks[chunk_type] = IHDR(chunk_value)
             elif chunk_type == 'PLTE':
                 self.chunks[chunk_type] = PLTE(chunk_value, self.chunks['IHDR'].color_type)
+            elif chunk_type == 'IEND':
+                self.chunks[chunk_type] = IEND(chunk_value)
             elif chunk_type == 'IDAT':
                 if isinstance(chunk_value, list):
                     chunk_list = [Chunk(chunk) for chunk in chunk_value]
@@ -130,7 +124,9 @@ class FilePNG:
             dft_shift = np.fft.fftshift(dft)
 
             # Compute magnitude and phase
-            magnitude_spectrum, phase_spectrum = 20 * np.log(cv2.cartToPolar(dft_shift[:, :, 0], dft_shift[:, :, 1]))
+            magnitude_spectrum, phase_spectrum = cv2.cartToPolar(dft_shift[:, :, 0], dft_shift[:, :, 1])
+            magnitude_spectrum += np.finfo(float).eps
+            magnitude_spectrum = 20 * np.log(magnitude_spectrum)
 
             # Display magnitude and phase
             plt.figure(channel_name + " channel")
@@ -154,6 +150,4 @@ def check_signature(chunk_byte):
     return True
 
 
-chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND',
-                b'cHRM', b'gAMA', b'iCCP', b'sBIT', b'sRGB', b'bKGD', b'hIST', b'tRNS', 'pHYs',
-                b'sPLT', b'tIME', b'iTXt', b'tEXt', b'zTXt']
+chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND']
