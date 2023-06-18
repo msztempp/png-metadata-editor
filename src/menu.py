@@ -2,7 +2,7 @@ import os
 from glob import glob
 from os import system, name
 from matplotlib import pyplot as plt
-from file import File
+from file_data import File
 
 
 class Menu:
