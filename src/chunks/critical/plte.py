@@ -12,7 +12,7 @@ def translate_RGB(rgb_tuple):
 
 
 class PLTE(Chunk):
-    def __init__(self, raw_bytes, color_type=3):
+    def __init__(self, raw_bytes, color_type):
         super().__init__(raw_bytes)
         self.entries = self.length // 3
         self.required = True if color_type == 3 else False

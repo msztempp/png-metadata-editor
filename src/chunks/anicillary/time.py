@@ -23,7 +23,12 @@ class TIME(Chunk):
         self.second = int.from_bytes(self.data[6:7], 'big')
 
     def details(self):
-        for key, value in self.__dict__.items():
-            if key != 'data':
-                print(f"{key} tIME chunk details: {value}")
+        self.print_basic_info()
+        print('chunk tIME info:')
+        print(' year:', self.year)
+        print(' month:', self.month)
+        print(' day:', self.day)
+        print(' hour:', self.hour)
+        print(' minute:', self.minute)
+        print(' second:', self.second)
         print()
