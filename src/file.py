@@ -2,6 +2,7 @@ import os
 from chunk import Chunk
 from src.chunks.anicillary.chrm import CHRM
 from src.chunks.anicillary.srgb import SRGB
+from src.chunks.anicillary.trns import TRNS
 from src.chunks.critical.ihdr import IHDR
 from src.chunks.critical.plte import PLTE
 from src.chunks.critical.idat import IDAT
@@ -27,7 +28,7 @@ class File:
 
     def load_and_get_name(self, pathname):
         try:
-            pathname = pathname.lower()
+            #pathname = pathname.lower()
             self.file_name = os.path.basename(pathname)
             self.name_without_extension = os.path.splitext(self.file_name)[0]
 
@@ -83,12 +84,14 @@ class File:
 
     def init_chunks(self):
         self.get_chunks()  # Initialize self.chunks with raw_bytes
-
+        is_plte = False
         for chunk_type, chunk_value in self.chunks.items():
+
             if chunk_type == 'IHDR':
                 self.chunks[chunk_type] = IHDR(chunk_value)
             elif chunk_type == 'PLTE':
                 self.chunks[chunk_type] = PLTE(chunk_value, self.chunks['IHDR'].color_type)
+                is_plte=True
             elif chunk_type == 'IEND':
                 self.chunks[chunk_type] = IEND(chunk_value)
             elif chunk_type == 'gAMA':
@@ -97,6 +100,11 @@ class File:
                 self.chunks[chunk_type] = CHRM(chunk_value)
             elif chunk_type == 'sRGB':
                 self.chunks[chunk_type] = SRGB(chunk_value)
+            elif chunk_type == 'tRNS':
+                if is_plte:
+                    self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type,self.chunks['PLTE'].entries)
+                else:
+                    self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type, None)
             elif chunk_type == 'IDAT':
                 if isinstance(chunk_value, list):
                     chunk_list = [Chunk(chunk) for chunk in chunk_value]
@@ -167,4 +175,4 @@ class File:
         print()
 
 
-chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA',b'cHRM',b'sRGB']
+chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA',b'cHRM',b'sRGB',b'tRNS']
