@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class IHDR(Chunk):
@@ -23,14 +24,17 @@ class IHDR(Chunk):
         self.analyse_header()
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
-        print('Width:', self.width)
-        print('Height:', self.height)
-        print('Bit depth:', self.bit_depth)
-        print('Color type:', self.color_type)
-        print('Compression method:', self.compression_method)
-        print('Filter method:', self.filter_method)
-        print('Interlace method:', self.interlace_method)
+        print('IHDR chunk info:')
+        print(' Width:', self.width)
+        print(' Height:', self.height)
+        print(' Bit depth:', self.bit_depth)
+        print(' Color type:', self.color_type)
+        print(' Compression method:', self.compression_method)
+        print(' Filter method:', self.filter_method)
+        print(' Interlace method:', self.interlace_method)
+        print()
 
     def analyse_header(self):
         if self.length is not 13:

@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class GAMMA(Chunk):
@@ -11,6 +12,7 @@ class GAMMA(Chunk):
         self.gamma_value = int.from_bytes(self.data, byteorder='big') / 100000
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print("gAMA chunk info: ")
         print(" Gamma value:", self.gamma_value)

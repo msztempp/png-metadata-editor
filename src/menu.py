@@ -1,6 +1,6 @@
 import os
 from glob import glob
-from os import system, name
+from clear_terminal import clear_terminal
 from matplotlib import pyplot as plt
 from file_data import File
 
@@ -28,33 +28,40 @@ class Menu:
 
     def main_options(self):
         print('Choose a file to work with:')
+        print()
         for i, file in enumerate(self.file_list, 1):
             base_name = os.path.basename(file)
             extension = os.path.splitext(base_name)[1]
             file_name = os.path.splitext(base_name)[0]
-            print('{} - {}{}'.format(i, file_name, extension))
+            print(' {} - {}{}'.format(i, file_name, extension))
+        print()
         print('q - quit\n')
         print('Your choice: ', end='')
 
     @staticmethod
     def file_options():
-        print('Choose option to perform')
-        print('1 - print all chunks')
-        print('2 - go to chunk details')
-        print('3 - save a new file with only critical chunks')
-        print('4 - perform fft')
-        print('b - go back')
-        print('q - quit')
+        print('Choose option to perform:')
+        print()
+        print(' 1 - print chunks list')
+        print(' 2 - go to chunk details')
+        print(' 3 - save a new file with only critical chunks')
+        print(' 4 - perform fft')
+        print(' b - go back')
+        print(' q - quit')
+        print()
         print('Your choice: ', end='')
 
     def chunks_options(self):
         print('Choose chunk to show details')
+        print()
         print('Available chunks:')
+        print()
         for i, chunk in enumerate(self.original_file.chunks.keys(), 1):
             print(' {} - {} details.'.format(i, chunk))
         print()
         print('b - go back')
         print('q - quit')
+        print()
         print('Your choice: ', end='')
 
     @staticmethod
@@ -66,6 +73,7 @@ class Menu:
         self.original_file = File(self.pathname)
         clear_terminal()
         print('Successfully loaded: {}'.format(self.original_file.file_name))
+        print()
 
     def menu_main(self):
         def load_file(choice):
@@ -90,6 +98,7 @@ class Menu:
             self.active_options = self.main_options
 
         def switch_chunks_menu():
+            clear_terminal()
             self.active_menu = self.menu_chunk
             self.active_options = self.chunks_options
 
@@ -119,13 +128,3 @@ class Menu:
             switch[str(i)] = chunk.details
         choice = input('').lower()
         switch.get(choice, Menu.invalid_option)()
-
-
-def clear_terminal():
-    # for windows the name is 'nt'
-    if name == 'nt':
-        _ = system('cls')
-
-    # and for mac and linux, the os.name is 'posix'
-    else:
-        _ = system('clear')

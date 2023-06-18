@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class PHYS(Chunk):
@@ -27,6 +28,7 @@ class PHYS(Chunk):
         return self.UNIT_SPECIFIER_TYPES[self.unit_specifier]
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('pHYs chunk info: ')
         print(' Pixels per unit, X-axis:', self.pixels_per_unit_x)

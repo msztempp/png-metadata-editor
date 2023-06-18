@@ -1,8 +1,8 @@
 import zlib
 import matplotlib.pyplot as plt
 import numpy as np
-
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 def bytes_per_pixel(color_type):
@@ -118,6 +118,7 @@ class IDAT(Chunk):
         print('Palette and transparency applied')
 
     def details(self):
-
+        clear_terminal()
         self.print_basic_info()
+        print('IDAT chunk info:')
         self.display_data('IDAT')

@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class SBIT(Chunk):
@@ -48,6 +49,7 @@ class SBIT(Chunk):
             return 4
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('sBIT chunk info: ')
         print(' Color type:', SBIT.COLOR_TYPES.get(self.color_type))

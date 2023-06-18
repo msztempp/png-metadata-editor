@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class TEXT(Chunk):
@@ -26,6 +27,7 @@ class TEXT(Chunk):
             self.text = data[1].decode('latin1')
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('tEXt chunk info: ')
         if type(self.data) == list:

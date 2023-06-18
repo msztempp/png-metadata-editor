@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class TRNS(Chunk):
@@ -41,6 +42,7 @@ class TRNS(Chunk):
                 self.alpha_index[i] = int.from_bytes(data[i:i + 1], byteorder='big')
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('tRNS chunk info: ')
         if self.color_type == 0:

@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class TIME(Chunk):
@@ -23,6 +24,7 @@ class TIME(Chunk):
         self.second = int.from_bytes(self.data[6:7], 'big')
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('chunk tIME info:')
         print(' year:', self.year)

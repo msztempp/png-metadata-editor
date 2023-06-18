@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class SRGB(Chunk):
@@ -22,6 +23,7 @@ class SRGB(Chunk):
         self.rendering_intent = SRGB.RENDERING_INTENT.get(rendering_number)
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('sRGB chunk info:')
         print('Rendering intent: ', self.rendering_intent)

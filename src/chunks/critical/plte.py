@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 def translate(value, from_min, from_max, to_min, to_max):
@@ -30,7 +31,9 @@ class PLTE(Chunk):
         plt.show()
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
-        print('entries:', self.entries)
-        print('required:', self.required)
+        print('PLTE chunk info:')
+        print(' entries:', self.entries)
+        print(' required:', self.required)
         self.plot_palettes()

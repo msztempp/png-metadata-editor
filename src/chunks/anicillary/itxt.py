@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class ITXT(Chunk):
@@ -26,6 +27,7 @@ class ITXT(Chunk):
         self.text = data[1].decode('utf-8')
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('iTXT chunk info: ')
         print(' Keyword:', self.keyword)

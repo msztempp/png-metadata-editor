@@ -1,4 +1,5 @@
 from src.chunk import Chunk
+from src.clear_terminal import clear_terminal
 
 
 class CHRM(Chunk):
@@ -29,6 +30,7 @@ class CHRM(Chunk):
         self.blueY = int.from_bytes(data[28:32], byteorder='big') / 100000
 
     def details(self):
+        clear_terminal()
         self.print_basic_info()
         print('cHRM chunk info: ')
         print(' White point x:', self.whitePointX)

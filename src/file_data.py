@@ -145,8 +145,13 @@ class File:
                     self.chunks[chunk_type] = Chunk(chunk_value)
 
     def print_chunks(self):
-        print('Critical chunks:', self.chunks_indices['critical'])
-        print('Ancillary chunks:', self.chunks_indices['ancillary'])
+        print('Critical chunks:')
+        for chunk_type in self.chunks_indices['critical'].keys():
+            print(' -', chunk_type)
+        print()
+        print('Ancillary chunks:')
+        for chunk_type in self.chunks_indices['ancillary'].keys():
+            print(' -', chunk_type)
         print()
 
     def print_to_file(self):
