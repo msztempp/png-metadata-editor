@@ -26,9 +26,15 @@ class Chunk:
         self.crc = [chunk.crc for chunk in chunk_list]
 
     def print_basic_info(self):
+        print('Chunk info:')
         print('Type:', self.chunk_type)
         print('Length:', self.length, 'chunk_bytes')
         print('CRC:', self.crc)
+        print('Is chunk critical:', self.is_critical())
+        print()
 
     def details(self):
         print('To be implemented')
+
+    def is_critical(self):
+        return self.chunk_type[0].isupper()

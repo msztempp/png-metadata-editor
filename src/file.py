@@ -1,4 +1,4 @@
-import os.path
+import os
 from chunk import Chunk
 from src.chunks.critical.ihdr import IHDR
 from src.chunks.critical.plte import PLTE
@@ -8,13 +8,15 @@ from src.chunks.anicillary.gama import GAMMA
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
+from check_signature import check_signature
 
 
 class File:
     def __init__(self, pathname):
+        self.file_name = None
         self.chunks_indices = None
         self.byte_data = None
-        self.name = None
+        self.name_without_extension = None
         self.pathname = pathname
         self.chunks = {}
         self.load_and_get_name(pathname)
@@ -22,15 +24,27 @@ class File:
         self.init_chunks()
 
     def load_and_get_name(self, pathname):
-        pathname = pathname.lower()
-        filename = os.path.basename(pathname)
-        self.name = filename
+        try:
+            pathname = pathname.lower()
+            self.file_name = os.path.basename(pathname)
+            self.name_without_extension = os.path.splitext(self.file_name)[0]
 
-        png_file = open(pathname, 'rb')
-        self.byte_data = png_file.read()
-        if not check_signature(self.byte_data):
-            raise Exception('Incorrect file format\nThis program is strictly for analyzing PNG files.')
-        png_file.close()
+            png_file = open(pathname, 'rb')
+            self.byte_data = png_file.read()
+            if not check_signature(self.byte_data):
+                raise Exception('Incorrect file format'
+                                '\nThis program is strictly for analyzing PNG files.')
+            png_file.close()
+        except Exception as e:
+            print(str(e))
+            choice = input("Would you like to try again? ('yes' to try again): ")
+            if choice.lower() == "yes":
+                from menu import Menu
+                menu = Menu()
+                menu.start()
+            else:
+                print("Exiting program...")
+                exit()
 
     def find_chunks(self):
         found_chunks = {'critical': {}, 'ancillary': {}}
@@ -101,14 +115,15 @@ class File:
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        new_name = os.path.join(folder_path, '{}_anonymized.png'.format(self.name))
+        new_name = os.path.join(folder_path, '{}_anonymized.png'.format(self.name_without_extension))
         tmp_png = open(new_name, 'wb')
         tmp_png.write(self.byte_data[:8])
         for chunk_type in self.chunks_indices['critical'].values():
             for instance_index in chunk_type:
                 chunk_data = self.get_chunk_data(instance_index)
                 tmp_png.write(chunk_data)
-        print('Saved only with critical chunks to: ', new_name)
+        print('Saved only with critical chunks to:\n', new_name)
+        print()
         tmp_png.close()
 
     def perform_fft(self):
@@ -137,20 +152,12 @@ class File:
             plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
             plt.subplot(122), plt.imshow(phase_spectrum, cmap='gray')
             plt.title('Phase Spectrum'), plt.xticks([]), plt.yticks([])
+            plt.suptitle(channel_name + ' channel')
             plt.show()
 
         cv2.waitKey(0)
-
-
-# https://www.w3.org/TR/png/#5PNG-file-signature
-# The first eight bytes of a PNG datastream always contain the following (decimal) values:
-def check_signature(chunk_byte):
-    signature = [137, 80, 78, 71, 13, 10, 26, 10]  # PNG signature
-
-    for i, byte in enumerate(signature):
-        if chunk_byte[i] != byte:
-            return False
-    return True
+        print('Performed FFT on image:', self.file_name + ' on 4 channels(RGB) and gray')
+        print()
 
 
 chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA']

@@ -34,6 +34,7 @@ class Menu:
             file_name = os.path.splitext(base_name)[0]
             print('{} - {}{}'.format(i, file_name, extension))
         print('q - quit\n')
+        print('Your choice: ', end='')
 
     @staticmethod
     def file_options():
@@ -44,13 +45,17 @@ class Menu:
         print('4 - perform fft')
         print('b - go back')
         print('q - quit')
+        print('Your choice: ', end='')
 
     def chunks_options(self):
-        print('Choose chunk to show details\n')
+        print('Choose chunk to show details')
+        print('Available chunks:')
         for i, chunk in enumerate(self.original_file.chunks.keys(), 1):
-            print('{}- {} details.'.format(i, chunk))
+            print(' {} - {} details.'.format(i, chunk))
+        print()
         print('b - go back')
         print('q - quit')
+        print('Your choice: ', end='')
 
     @staticmethod
     def invalid_option(*args):
@@ -60,7 +65,7 @@ class Menu:
         self.pathname = pathname
         self.original_file = File(self.pathname)
         clear_terminal()
-        print('Successfully loaded: {}'.format(self.original_file.name))
+        print('Successfully loaded: {}'.format(self.original_file.file_name))
 
     def menu_main(self):
         def load_file(choice):
@@ -102,6 +107,7 @@ class Menu:
 
     def menu_chunk(self):
         def go_back():
+            clear_terminal()
             self.active_menu = self.menu_file
             self.active_options = Menu.file_options
 
