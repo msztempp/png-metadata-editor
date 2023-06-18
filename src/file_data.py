@@ -31,7 +31,7 @@ class File:
 
     def load_and_get_name(self, pathname):
         try:
-            #pathname = pathname.lower()
+            # pathname = pathname.lower()
             self.file_name = os.path.basename(pathname)
             self.name_without_extension = os.path.splitext(self.file_name)[0]
 
@@ -57,15 +57,18 @@ class File:
         i = 0
         while self.byte_data[i:i + 1]:
             chunk_type_bytes = self.byte_data[i:i + 4]
-            if chunk_type_bytes in chunks_types:
-                chunk_type_str = chunk_type_bytes.decode('utf-8')
-                if chunk_type_str in found_chunks['critical'].keys():
+            chunk_type_str = chunk_type_bytes.decode('latin-1')
+            if chunk_type_bytes in critical_chunks:
+                if chunk_type_str in found_chunks['critical']:
                     found_chunks['critical'][chunk_type_str].append(i - 4)
                 else:
                     found_chunks['critical'][chunk_type_str] = [i - 4]
-                i += 4
-            else:
-                i += 1
+            elif chunk_type_bytes in ancillary_chunks:
+                if chunk_type_str in found_chunks['ancillary']:
+                    found_chunks['ancillary'][chunk_type_str].append(i - 4)
+                else:
+                    found_chunks['ancillary'][chunk_type_str] = [i - 4]
+            i += 4 if chunk_type_bytes in chunks_types else 1
         self.chunks_indices = found_chunks
 
     def get_chunk_data(self, index):
@@ -93,7 +96,7 @@ class File:
                 self.chunks[chunk_type] = IHDR(chunk_value)
             elif chunk_type == 'PLTE':
                 self.chunks[chunk_type] = PLTE(chunk_value, self.chunks['IHDR'].color_type)
-                is_plte=True
+                is_plte = True
             elif chunk_type == 'IEND':
                 self.chunks[chunk_type] = IEND(chunk_value)
             elif chunk_type == 'gAMA':
@@ -112,7 +115,7 @@ class File:
                 self.chunks[chunk_type] = SRGB(chunk_value)
             elif chunk_type == 'tRNS':
                 if is_plte:
-                    self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type,self.chunks['PLTE'].entries)
+                    self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type, self.chunks['PLTE'].entries)
                 else:
                     self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type, None)
             elif chunk_type == 'tIME':
@@ -133,8 +136,7 @@ class File:
                     self.chunks[chunk_type] = Chunk(chunk_value)
 
     def print_chunks(self):
-        for chunk in self.chunks.values():
-            chunk.print_basic_info()
+        print('chunks_indices:', self.chunks_indices)
 
     def print_to_file(self):
         folder_path = '../img-anonymized'
@@ -186,4 +188,6 @@ class File:
         print()
 
 
-chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA',b'cHRM',b'sRGB',b'tRNS', b'tIME',b'tEXt',b'iTXt']
+chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA', b'cHRM', b'sRGB', b'tRNS', b'tIME', b'tEXt', b'iTXt']
+critical_chunks = [b'IHDR', b'PLTE', b'IDAT', b'IEND']
+ancillary_chunks = [b'gAMA', b'cHRM', b'sRGB', b'tRNS', b'tIME', b'tEXt', b'iTXt']

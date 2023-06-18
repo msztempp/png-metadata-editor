@@ -11,4 +11,6 @@ class GAMMA(Chunk):
         self.gamma_value = int.from_bytes(self.data, byteorder='big') / 100000
 
     def details(self):
-        print("gamma Value:", self.gamma_value)
+        self.print_basic_info()
+        print("GAMMA Chunk Details: ")
+        print(" gamma Value:", self.gamma_value)
