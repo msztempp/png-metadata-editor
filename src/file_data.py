@@ -1,6 +1,7 @@
 import os
 from chunk import Chunk
 from src.chunks.anicillary.chrm import CHRM
+from src.chunks.anicillary.itxt import ITXT
 from src.chunks.anicillary.srgb import SRGB
 from src.chunks.anicillary.text import TEXT
 from src.chunks.anicillary.trns import TRNS
@@ -105,6 +106,8 @@ class File:
                     self.chunks[chunk_type] = TEXT(chunk_value)
             elif chunk_type == 'cHRM':
                 self.chunks[chunk_type] = CHRM(chunk_value)
+            elif chunk_type == 'iTXt':
+                self.chunks[chunk_type] = ITXT(chunk_value)
             elif chunk_type == 'sRGB':
                 self.chunks[chunk_type] = SRGB(chunk_value)
             elif chunk_type == 'tRNS':
@@ -183,4 +186,4 @@ class File:
         print()
 
 
-chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA',b'cHRM',b'sRGB',b'tRNS', b'tIME',b'tEXt']
+chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA',b'cHRM',b'sRGB',b'tRNS', b'tIME',b'tEXt',b'iTXt']
