@@ -14,6 +14,6 @@ class GAMMA(Chunk):
     def details(self):
         clear_terminal()
         self.print_basic_info()
-        print("gAMA chunk info: ")
-        print(" Gamma value:", self.gamma_value)
+        print('gAMA chunk info: ')
+        print(' Gamma value:', self.gamma_value)
         print()

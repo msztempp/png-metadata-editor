@@ -72,7 +72,7 @@ class IDAT(Chunk):
                                                        self.recon_c(r, c, stride))
                 else:
                     raise Exception('unknown filter type: ' + str(filter_type))
-                self.recon_data.append(recon_x & 0xff)  # truncation to byte
+                self.recon_data.append(recon_x & 0xff)
 
     def recon_a(self, r, c, stride):
         return self.recon_data[r * stride + c - self.bytes_per_pixel] if c >= self.bytes_per_pixel else 0

@@ -22,7 +22,7 @@ class Menu:
         plt.ion()
         plt.show()
         self.set_file_list('../img-example/')
-        while self.choice != 'q' and self.choice != 'Q':  # Use 'and' instead of 'or' for the condition
+        while self.choice is not 'q' or self.choice is not 'Q':
             self.active_options()
             self.active_menu()
 
@@ -78,7 +78,7 @@ class Menu:
     def menu_main(self):
         def load_file(choice):
             self.load_file(self.file_list[int(choice) - 1])
-            self.active_menu = self.menu_file  # Update the active_menu attribute
+            self.active_menu = self.menu_file
             self.active_options = Menu.file_options
 
         switch = {

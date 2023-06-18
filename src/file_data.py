@@ -45,13 +45,13 @@ class File:
             png_file.close()
         except Exception as e:
             print(str(e))
-            choice = input("Would you like to try again? ('yes' to try again): ")
-            if choice.lower() == "yes":
+            choice = input('Would you like to try again? ( (yes) to try again): ')
+            if choice.lower() == 'yes':
                 from menu import Menu
                 menu = Menu()
                 menu.start()
             else:
-                print("Exiting program...")
+                print('Exiting program...')
                 exit()
 
     def find_chunks(self):
@@ -191,7 +191,7 @@ class File:
             magnitude_spectrum = 20 * np.log(magnitude_spectrum)
 
             # Display magnitude and phase
-            plt.figure(channel_name + " channel")
+            plt.figure(channel_name + ' channel')
             plt.subplot(121), plt.imshow(magnitude_spectrum, cmap='gray')
             plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
             plt.subplot(122), plt.imshow(phase_spectrum, cmap='gray')
