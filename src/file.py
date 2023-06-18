@@ -1,6 +1,7 @@
 import os
 from chunk import Chunk
 from src.chunks.anicillary.chrm import CHRM
+from src.chunks.anicillary.srgb import SRGB
 from src.chunks.critical.ihdr import IHDR
 from src.chunks.critical.plte import PLTE
 from src.chunks.critical.idat import IDAT
@@ -94,6 +95,8 @@ class File:
                 self.chunks[chunk_type] = GAMMA(chunk_value)
             elif chunk_type == 'cHRM':
                 self.chunks[chunk_type] = CHRM(chunk_value)
+            elif chunk_type == 'sRGB':
+                self.chunks[chunk_type] = SRGB(chunk_value)
             elif chunk_type == 'IDAT':
                 if isinstance(chunk_value, list):
                     chunk_list = [Chunk(chunk) for chunk in chunk_value]
@@ -164,4 +167,4 @@ class File:
         print()
 
 
-chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA',b'cHRM']
+chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA',b'cHRM',b'sRGB']
