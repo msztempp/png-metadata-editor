@@ -2,6 +2,8 @@ import os
 from chunk import Chunk
 from src.chunks.anicillary.chrm import CHRM
 from src.chunks.anicillary.itxt import ITXT
+from src.chunks.anicillary.phys import PHYS
+from src.chunks.anicillary.sbit import SBIT
 from src.chunks.anicillary.srgb import SRGB
 from src.chunks.anicillary.text import TEXT
 from src.chunks.anicillary.trns import TRNS
@@ -111,8 +113,15 @@ class File:
                 self.chunks[chunk_type] = CHRM(chunk_value)
             elif chunk_type == 'iTXt':
                 self.chunks[chunk_type] = ITXT(chunk_value)
+            elif chunk_type == 'pHYs':
+                self.chunks[chunk_type] = PHYS(chunk_value)
             elif chunk_type == 'sRGB':
                 self.chunks[chunk_type] = SRGB(chunk_value)
+            elif chunk_type == 'sBIT':
+                if is_plte:
+                    self.chunks[chunk_type] = SBIT(chunk_value, self.chunks['IHDR'].color_type, self.chunks['PLTE'].entries)
+                else:
+                    self.chunks[chunk_type] = SBIT(chunk_value, self.chunks['IHDR'].color_type, None)
             elif chunk_type == 'tRNS':
                 if is_plte:
                     self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type, self.chunks['PLTE'].entries)
@@ -136,7 +145,9 @@ class File:
                     self.chunks[chunk_type] = Chunk(chunk_value)
 
     def print_chunks(self):
-        print('chunks_indices:', self.chunks_indices)
+        print('Critical chunks:', self.chunks_indices['critical'])
+        print('Ancillary chunks:', self.chunks_indices['ancillary'])
+        print()
 
     def print_to_file(self):
         folder_path = '../img-anonymized'
@@ -190,4 +201,4 @@ class File:
 
 chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA', b'cHRM', b'sRGB', b'tRNS', b'tIME', b'tEXt', b'iTXt']
 critical_chunks = [b'IHDR', b'PLTE', b'IDAT', b'IEND']
-ancillary_chunks = [b'gAMA', b'cHRM', b'sRGB', b'tRNS', b'tIME', b'tEXt', b'iTXt']
+ancillary_chunks = [b'gAMA', b'cHRM', b'sRGB', b'tRNS', b'tIME', b'tEXt', b'iTXt', b'sBIT', b'pHYs']

@@ -12,5 +12,6 @@ class GAMMA(Chunk):
 
     def details(self):
         self.print_basic_info()
-        print("GAMMA Chunk Details: ")
-        print(" gamma Value:", self.gamma_value)
+        print("gAMA chunk info: ")
+        print(" Gamma value:", self.gamma_value)
+        print()

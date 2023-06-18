@@ -23,6 +23,6 @@ class SRGB(Chunk):
 
     def details(self):
         self.print_basic_info()
-        print('chunk sRGB info:')
+        print('sRGB chunk info:')
         print('Rendering intent: ', self.rendering_intent)
         print()

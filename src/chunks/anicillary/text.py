@@ -27,10 +27,11 @@ class TEXT(Chunk):
 
     def details(self):
         self.print_basic_info()
+        print('tEXt chunk info: ')
         if type(self.data) == list:
             for i in range(0, len(self.data)):
-                print('Keyword: ', self.keyword[i])
-                print('Text string: ', self.text[i])
+                print(' Keyword: ', self.keyword[i])
+                print(' Text string: ', self.text[i])
         else:
-            print('Keyword: ', self.keyword)
-            print('Text string: ', self.text)
+            print(' Keyword: ', self.keyword)
+            print(' Text string: ', self.text)

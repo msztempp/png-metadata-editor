@@ -102,12 +102,12 @@ class Menu:
             'q': exit,
         }
         choice = input('').lower()
-        # clear_terminal()
+        clear_terminal()
         switch.get(choice, Menu.invalid_option)()
 
     def menu_chunk(self):
         def go_back():
-            # clear_terminal()
+            clear_terminal()
             self.active_menu = self.menu_file
             self.active_options = Menu.file_options
 

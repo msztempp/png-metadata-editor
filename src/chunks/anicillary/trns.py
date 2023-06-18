@@ -42,12 +42,13 @@ class TRNS(Chunk):
 
     def details(self):
         self.print_basic_info()
+        print('tRNS chunk info: ')
         if self.color_type == 0:
-            print('Grey sample value:', self.grey_sample)
+            print(' Grey sample value:', self.grey_sample)
         elif self.color_type == 2:
-            print('Red sample value:', self.red_sample)
-            print('Green sample value:', self.green_sample)
-            print('Blue sample value:', self.blue_sample)
+            print(' Red sample value:', self.red_sample)
+            print(' Green sample value:', self.green_sample)
+            print(' Blue sample value:', self.blue_sample)
         elif self.color_type == 3:
             for i in range(0, self.length):
-                print('Alpha for palette index', i, ':', self.alpha_index[i])
+                print(' Alpha for palette index', i, ':', self.alpha_index[i])

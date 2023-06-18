@@ -27,10 +27,12 @@ class ITXT(Chunk):
 
     def details(self):
         self.print_basic_info()
-        print('ITXT Chunk Details: ')
+        print('iTXT chunk info: ')
         print(' Keyword:', self.keyword)
         print(' Compression flag:', self.compression_flag)
         print(' Compression method:', self.compression_method)
         print(' Language tag:', self.language_tag)
         print(' Translated keyword:', self.translated_keyword)
         print(' Text:', self.text)
+        print()
+        

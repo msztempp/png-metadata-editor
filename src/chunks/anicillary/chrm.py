@@ -16,7 +16,7 @@ class CHRM(Chunk):
 
     def analyse(self):
         if self.length != 32:
-            raise Exception('CHRM chunk length is invalid')
+            raise Exception('cHRM chunk length is invalid')
 
         data = self.data
         self.whitePointX = int.from_bytes(data[0:4], byteorder='big') / 100000
@@ -30,7 +30,7 @@ class CHRM(Chunk):
 
     def details(self):
         self.print_basic_info()
-        print('cHRM chunk details: ')
+        print('cHRM chunk info: ')
         print(' White point x:', self.whitePointX)
         print(' White point y:', self.whitePointY)
         print(' Red x:', self.redX)
