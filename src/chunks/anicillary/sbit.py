@@ -11,8 +11,8 @@ class SBIT(Chunk):
         6: 'True_colour with alpha'
     }
 
-    def __init__(self, chunk_bytes, color_type, sample_depth):
-        super().__init__(chunk_bytes)
+    def __init__(self, raw_chunk_bytes, color_type, sample_depth):
+        super().__init__(raw_chunk_bytes)
         self.color_type = color_type
         self.sample_depth = sample_depth
         self.significant_bits = None

@@ -3,8 +3,8 @@ from src.clear_terminal import clear_terminal
 
 
 class ITXT(Chunk):
-    def __init__(self, chunk_bytes):
-        super().__init__(chunk_bytes)
+    def __init__(self, raw_chunk_bytes):
+        super().__init__(raw_chunk_bytes)
         self.keyword = None
         self.compression_flag = None
         self.compression_method = None

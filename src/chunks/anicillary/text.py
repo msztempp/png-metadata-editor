@@ -3,13 +3,13 @@ from src.clear_terminal import clear_terminal
 
 
 class TEXT(Chunk):
-    def __init__(self, init_data):
-        if type(init_data) == list:
-            super().__init__(is_chunk_list=init_data)
+    def __init__(self, raw_chunk_data):
+        if type(raw_chunk_data) == list:
+            super().__init__(is_chunk_list=raw_chunk_data)
             self.keyword = []
             self.text = []
         else:
-            super().__init__(chunk_bytes=init_data)
+            super().__init__(chunk_bytes=raw_chunk_data)
             self.keyword = None
             self.text = None
         self.analyse()

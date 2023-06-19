@@ -3,8 +3,8 @@ from src.clear_terminal import clear_terminal
 
 
 class TIME(Chunk):
-    def __init__(self, raw_chunk_bytes):
-        super().__init__(raw_chunk_bytes)
+    def __init__(self, raw_bytes):
+        super().__init__(raw_bytes)
         self.year = None  # 2 bytes (e.g., 1995 not 95)
         self.month = None  # 1 byte (1-12)
         self.day = None  # 1 byte (1-31)

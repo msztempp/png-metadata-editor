@@ -1,4 +1,9 @@
 import os
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+from check_signature import check_signature
+
 from chunk import Chunk
 from src.chunks.anicillary.chrm import CHRM
 from src.chunks.anicillary.itxt import ITXT
@@ -13,10 +18,6 @@ from src.chunks.critical.plte import PLTE
 from src.chunks.critical.idat import IDAT
 from src.chunks.critical.iend import IEND
 from src.chunks.anicillary.gama import GAMMA
-import cv2
-import numpy as np
-from matplotlib import pyplot as plt
-from check_signature import check_signature
 
 
 class File:
@@ -70,7 +71,7 @@ class File:
                     found_chunks['ancillary'][chunk_type_str].append(i - 4)
                 else:
                     found_chunks['ancillary'][chunk_type_str] = [i - 4]
-            i += 4 if chunk_type_bytes in chunks_types else 1
+            i += 4 if chunk_type_bytes in critical_chunks and ancillary_chunks else 1
         self.chunks_indices = found_chunks
 
     def get_chunk_data(self, index):
@@ -91,7 +92,7 @@ class File:
                         self.chunks[chunk_type] = self.get_chunk_data(instance_index)
 
     def init_chunks(self):
-        self.get_chunks()  # Initialize self.chunks with raw_bytes
+        self.get_chunks()
         is_plte = False
         chunk_mapping = {
             'IHDR': IHDR,
@@ -182,6 +183,5 @@ class File:
         print()
 
 
-chunks_types = [b'IHDR', b'PLTE', b'IDAT', b'IEND', b'gAMA', b'cHRM', b'sRGB', b'tRNS', b'tIME', b'tEXt', b'iTXt']
 critical_chunks = [b'IHDR', b'PLTE', b'IDAT', b'IEND']
 ancillary_chunks = [b'gAMA', b'cHRM', b'sRGB', b'tRNS', b'tIME', b'tEXt', b'iTXt', b'sBIT', b'pHYs']

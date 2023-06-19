@@ -93,29 +93,11 @@ class IDAT(Chunk):
             ax.imshow(np.array(data).reshape((self.height, self.width)), cmap='gray')
         else:
             ax.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
-        ax.set_axis_off()
-        ax.set_facecolor('whitesmoke')
-        fig.patch.set_facecolor('whitesmoke')
-        fig.tight_layout()
+        plt.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
+        title = 'reconstructed ' + title + ' data'
+        ax.set_title(title)
         plt.draw()
         plt.show()
-        plt.pause(0.001)
-
-    def apply_palette(self, palette):
-        new_data = [pixel for pixel_i in self.recon_data for pixel in palette[pixel_i]]
-        self.display_data('IDAT + palettes', data=new_data, bytes_per_pixel=3)
-
-    def apply_transparency(self, transparency_data, palette=None):
-        if palette is not None:
-            transparent_palette = []
-            for i in range(len(palette)):
-                if i > len(transparency_data) - 1:
-                    transparent_palette.append((palette[i][0], palette[i][1], palette[i][2], 255))
-                else:
-                    transparent_palette.append((palette[i][0], palette[i][1], palette[i][2], transparency_data[i]))
-            new_data = [pixel for pixel_i in self.recon_data for pixel in transparent_palette[pixel_i]]
-            self.display_data('IDAT + palette + transparency', data=new_data, bytes_per_pixel=4)
-        print('Palette and transparency applied')
 
     def details(self):
         clear_terminal()

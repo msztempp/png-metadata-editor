@@ -8,8 +8,8 @@ class PHYS(Chunk):
         1: 'Metres'
     }
 
-    def __init__(self, chunk_bytes):
-        super().__init__(chunk_bytes)
+    def __init__(self, raw_chunk_bytes):
+        super().__init__(raw_chunk_bytes)
         self.pixels_per_unit_x = None
         self.pixels_per_unit_y = None
         self.unit_specifier = None

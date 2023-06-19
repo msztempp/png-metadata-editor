@@ -3,8 +3,8 @@ from src.clear_terminal import clear_terminal
 
 
 class GAMMA(Chunk):
-    def __init__(self, raw_bytes):
-        super().__init__(raw_bytes)
+    def __init__(self, raw_chunk_bytes):
+        super().__init__(raw_chunk_bytes)
         self.gamma_value = None
         self.check_gamma()
 

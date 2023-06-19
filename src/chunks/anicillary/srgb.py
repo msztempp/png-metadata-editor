@@ -10,8 +10,8 @@ class SRGB(Chunk):
         3: 'Absolute colorimetric'  # for images requiring preservation of absolute colorimetry, such as previews of images destined for a different output device (proofs).
     }
 
-    def __init__(self, chunk_bytes):
-        super().__init__(chunk_bytes)
+    def __init__(self, raw_chunk_bytes):
+        super().__init__(raw_chunk_bytes)
         self.rendering_intent = None
         self.analyse()
 
