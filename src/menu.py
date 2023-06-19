@@ -46,6 +46,21 @@ class Menu:
         print(' 2 - go to chunk details')
         print(' 3 - save a new file with only critical chunks')
         print(' 4 - perform fft')
+        print(' 5 - encrypt/decrypt file')
+        print(' b - go back')
+        print(' q - quit')
+        print()
+        print('Your choice: ', end='')
+
+    @staticmethod
+    def encrypt_decrypt_options():
+        print('Choose option to perform:')
+        print()
+        print(' 1 - encrypt(ECB')
+        print(' 2 - decrypt(ECB)')
+        print(' 3 - encrypt(CBC)')
+        print(' 4 - decrypt(CBC)')
+        print(' 5 - compare')
         print(' b - go back')
         print(' q - quit')
         print()
@@ -127,4 +142,42 @@ class Menu:
         for i, chunk in enumerate(self.original_file.chunks.values(), 1):
             switch[str(i)] = chunk.details
         choice = input('').lower()
+        switch.get(choice, Menu.invalid_option)()
+
+    def decrypt_encrypt_menu(self):
+        encrypted_data = None
+        decrypted_data = None
+
+        def encrypt():
+            pass
+
+        def decrypt():
+            pass
+
+        def encrypt_cbc():
+            pass
+
+        def decrypt_cbc():
+            pass
+
+        def compare():
+            global data_after_encrypt
+            key_size = int(input(' Enter key size: ').lower())
+            data = self.original_file.chunks['IDAT'].recon_data
+        def go_back():
+            clear_terminal()
+            self.active_menu = self.menu_file
+            self.active_options = Menu.file_options
+
+        switch = {
+            '1': encrypt,
+            '2': decrypt,
+            '3': encrypt_cbc,
+            '4': decrypt_cbc,
+            '5': compare,
+            'b': go_back,
+            'q': exit,
+        }
+        choice = input('').lower()
+        clear_terminal()
         switch.get(choice, Menu.invalid_option)()

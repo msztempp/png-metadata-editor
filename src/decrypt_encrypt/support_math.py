@@ -8,11 +8,12 @@ def is_prime(n):
     return sympy.isprime(n)
 
 
-def generate_random_prime():
+def generate_random_prime(bit_size):
     while True:
-        num = random.randint(2, 10 ** 6)
+        num = random.getrandbits(bit_size)
         if is_prime(num):
-            return num
+            prime_number = num
+            return prime_number
 
 
 def greatest_common_divisor(a, b):
@@ -23,5 +24,17 @@ def extended_euclidean_algorithm(a, b):
     return egcd(a, b)
 
 
-print(is_prime(5))
-print(generate_random_prime())
+def generate_prime_pair(key_size):
+    prime_a = generate_random_prime(key_size // 2)
+    prime_b = generate_random_prime(key_size // 2)
+    while prime_a == prime_b:
+        prime_b = generate_random_prime(key_size // 2)
+    return prime_a, prime_b
+
+
+def inverse_modulo(a, b):
+    x, y, z = extended_euclidean_algorithm(a, b)
+    if x != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return y % b
