@@ -3,8 +3,8 @@ from src.clear_terminal import clear_terminal
 
 
 class IEND(Chunk):
-    def __init__(self, raw_bytes):
-        super().__init__(raw_bytes)
+    def __init__(self, raw_chunk_bytes):
+        super().__init__(raw_chunk_bytes)
 
     def details(self):
         clear_terminal()

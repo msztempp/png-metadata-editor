@@ -93,50 +93,28 @@ class File:
     def init_chunks(self):
         self.get_chunks()  # Initialize self.chunks with raw_bytes
         is_plte = False
+        chunk_mapping = {
+            'IHDR': IHDR,
+            'PLTE': lambda chunk_value: PLTE(chunk_value, self.chunks['IHDR'].color_type),
+            'IEND': IEND,
+            'gAMA': GAMMA,
+            'tEXt': lambda chunk_value: TEXT([Chunk(chunk) for chunk in chunk_value]) if isinstance(chunk_value, list) else TEXT(chunk_value),
+            'cHRM': CHRM,
+            'iTXt': ITXT,
+            'pHYs': PHYS,
+            'sRGB': SRGB,
+            'sBIT': lambda chunk_value: SBIT(chunk_value, self.chunks['IHDR'].color_type, self.chunks['PLTE'].entries) if is_plte else SBIT(chunk_value,
+                                                                                                                                            self.chunks['IHDR'].color_type, None),
+            'tRNS': lambda chunk_value: TRNS(chunk_value, self.chunks['IHDR'].color_type, self.chunks['PLTE'].entries) if is_plte else TRNS(chunk_value,
+                                                                                                                                            self.chunks['IHDR'].color_type, None),
+            'tIME': TIME,
+            'IDAT': lambda chunk_value: IDAT([Chunk(chunk) for chunk in chunk_value], self.chunks['IHDR'].width, self.chunks['IHDR'].height,
+                                             self.chunks['IHDR'].color_type) if isinstance(chunk_value, list) else IDAT(chunk_value, self.chunks['IHDR'].width,
+                                                                                                                        self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
+        }
         for chunk_type, chunk_value in self.chunks.items():
-            if chunk_type == 'IHDR':
-                self.chunks[chunk_type] = IHDR(chunk_value)
-            elif chunk_type == 'PLTE':
-                self.chunks[chunk_type] = PLTE(chunk_value, self.chunks['IHDR'].color_type)
-                is_plte = True
-            elif chunk_type == 'IEND':
-                self.chunks[chunk_type] = IEND(chunk_value)
-            elif chunk_type == 'gAMA':
-                self.chunks[chunk_type] = GAMMA(chunk_value)
-            elif chunk_type == 'tEXt':
-                if isinstance(chunk_value, list):
-                    chunk_list = [Chunk(chunk) for chunk in chunk_value]
-                    self.chunks[chunk_type] = TEXT(chunk_list)
-                else:
-                    self.chunks[chunk_type] = TEXT(chunk_value)
-            elif chunk_type == 'cHRM':
-                self.chunks[chunk_type] = CHRM(chunk_value)
-            elif chunk_type == 'iTXt':
-                self.chunks[chunk_type] = ITXT(chunk_value)
-            elif chunk_type == 'pHYs':
-                self.chunks[chunk_type] = PHYS(chunk_value)
-            elif chunk_type == 'sRGB':
-                self.chunks[chunk_type] = SRGB(chunk_value)
-            elif chunk_type == 'sBIT':
-                if is_plte:
-                    self.chunks[chunk_type] = SBIT(chunk_value, self.chunks['IHDR'].color_type, self.chunks['PLTE'].entries)
-                else:
-                    self.chunks[chunk_type] = SBIT(chunk_value, self.chunks['IHDR'].color_type, None)
-            elif chunk_type == 'tRNS':
-                if is_plte:
-                    self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type, self.chunks['PLTE'].entries)
-                else:
-                    self.chunks[chunk_type] = TRNS(chunk_value, self.chunks['IHDR'].color_type, None)
-            elif chunk_type == 'tIME':
-                self.chunks[chunk_type] = TIME(chunk_value)
-            elif chunk_type == 'IDAT':
-                if isinstance(chunk_value, list):
-                    chunk_list = [Chunk(chunk) for chunk in chunk_value]
-                    self.chunks[chunk_type] = IDAT(chunk_list, self.chunks['IHDR'].width,
-                                                   self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
-                else:
-                    self.chunks[chunk_type] = IDAT(chunk_value, self.chunks['IHDR'].width,
-                                                   self.chunks['IHDR'].height, self.chunks['IHDR'].color_type)
+            if chunk_type in chunk_mapping:
+                self.chunks[chunk_type] = chunk_mapping[chunk_type](chunk_value)
             else:
                 if isinstance(chunk_value, list):
                     chunk_list = [Chunk(chunk) for chunk in chunk_value]

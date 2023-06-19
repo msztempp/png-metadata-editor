@@ -3,8 +3,8 @@ from src.clear_terminal import clear_terminal
 
 
 class TRNS(Chunk):
-    def __init__(self, chunk_bytes, color_type, entries):
-        super().__init__(chunk_bytes)
+    def __init__(self, raw_chunk_bytes, color_type, entries):
+        super().__init__(raw_chunk_bytes)
         self.alpha_index = []
         if color_type == 0:
             self.grey_sample = None

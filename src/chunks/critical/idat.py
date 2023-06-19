@@ -30,13 +30,13 @@ def paeth_predictor(a, b, c):
 
 
 class IDAT(Chunk):
-    def __init__(self, init_data, width, height, color_type):
+    def __init__(self, raw_chunk_bytes, width, height, color_type):
         self.compressed_data = None
         self.recon_data = None
-        if type(init_data) == list:
-            super().__init__(is_chunk_list=init_data)
+        if type(raw_chunk_bytes) == list:
+            super().__init__(is_chunk_list=raw_chunk_bytes)
         else:
-            super().__init__(chunk_bytes=init_data)
+            super().__init__(chunk_bytes=raw_chunk_bytes)
         if type(self.data) == list:
             self.length = sum(self.length)
             self.data = b''.join(self.data)

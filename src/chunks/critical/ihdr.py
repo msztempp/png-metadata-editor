@@ -12,8 +12,8 @@ class IHDR(Chunk):
         'default': 'Not found'
     }
 
-    def __init__(self, chunk_bytes):
-        super().__init__(chunk_bytes)
+    def __init__(self, raw_chunk_bytes):
+        super().__init__(raw_chunk_bytes)
         self.interlace_method = None
         self.filter_method = None
         self.compression_method = None
