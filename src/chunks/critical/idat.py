@@ -40,6 +40,7 @@ class IDAT(Chunk):
         if type(self.data) == list:
             self.length = sum(self.length)
             self.data = b''.join(self.data)
+            self.raw_data = b''.join(self.raw_data)
         self.width = width
         self.height = height
         self.color_type = color_type
@@ -47,7 +48,7 @@ class IDAT(Chunk):
         self.analyse()
 
     def analyse(self):
-        self.compressed_data = bytearray(self.data)
+        self.data = bytearray(self.data)
         self.data = zlib.decompress(self.data)
         self.recon_data = []
         stride = self.width * self.bytes_per_pixel
@@ -94,7 +95,7 @@ class IDAT(Chunk):
         else:
             ax.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
         plt.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
-        title = 'reconstructed ' + title + ' data'
+        title = title + ' data'
         ax.set_title(title)
         plt.draw()
         plt.show()

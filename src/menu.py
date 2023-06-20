@@ -4,9 +4,12 @@ from clear_terminal import clear_terminal
 from matplotlib import pyplot as plt
 from file_data import File
 
+from src.decrypt_encrypt.decrypt_encrypt_algorithm import DecryptEncryptAlgorithm
+
 
 class Menu:
     def __init__(self):
+        self.DecryptEncryptAlgorithm = None
         self.file_menu = None
         self.file_list = None
         self.pathname = None
@@ -14,6 +17,9 @@ class Menu:
         self.choice = None
         self.active_menu = self.menu_main
         self.active_options = self.main_options
+        self.data_after_encryption = None
+        self.data_after_decryption = None
+        self.after_iend_data = None
 
     def set_file_list(self, dir_path):
         self.file_list = glob(dir_path + '*')
@@ -22,7 +28,7 @@ class Menu:
         plt.ion()
         plt.show()
         self.set_file_list('../img-example/')
-        while self.choice is not 'q' or self.choice is not 'Q':
+        while self.choice != 'q' or self.choice != 'Q':
             self.active_options()
             self.active_menu()
 
@@ -117,11 +123,17 @@ class Menu:
             self.active_menu = self.menu_chunk
             self.active_options = self.chunks_options
 
+        def switch_encrypt_decrypt_menu():
+            clear_terminal()
+            self.active_menu = self.decrypt_encrypt_menu
+            self.active_options = self.encrypt_decrypt_options
+
         switch = {
             '1': self.original_file.print_chunks,
             '2': switch_chunks_menu,
             '3': self.original_file.print_to_file,
             '4': self.original_file.perform_fft,
+            '5': switch_encrypt_decrypt_menu,
             'b': go_back,
             'q': exit,
         }
@@ -146,20 +158,88 @@ class Menu:
 
     def decrypt_encrypt_menu(self):
 
-        def encrypt():
-            pass
+        def encrypt_ecb():
+            self.DecryptEncryptAlgorithm = DecryptEncryptAlgorithm(1024)
+            encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_ecb(self.original_file.chunks['IDAT'].recon_data)
 
-        def decrypt():
-            pass
+            new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
+            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
+
+            self.original_file.chunks['IDAT'].display_data('data before encryption')
+
+            self.original_file.chunks['IDAT'].data = new_idat_data[0]
+            self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
+            # print('new_file', new_file.chunks['IDAT'].data)
+            self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
+            self.data_after_encryption = new_idat_data[0]
+            self.original_file.chunks['IDAT'].display_data('data after encryption')
+            # new_file.print_encrypted_file(encrypted_data_ebc[1], new_idat_data[1])
+            # print('data after encryption', self.data_after_encryption)
+
+        def decrypt_ecb():
+            # print('data after encryption', data_after_encryption)
+            self.data_after_decryption = self.DecryptEncryptAlgorithm.decrypt_ecb(self.data_after_encryption, self.after_iend_data)
+            self.original_file.chunks['IDAT'].display_data('data before decryption')
+            self.original_file.chunks['IDAT'].data = self.data_after_decryption
+            self.original_file.chunks['IDAT'].recon_data = self.data_after_decryption
+            self.original_file.chunks['IDAT'].display_data('data decrypted')
 
         def encrypt_cbc():
-            pass
+            self.DecryptEncryptAlgorithm = DecryptEncryptAlgorithm(1024)
+            encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_cbc(self.original_file.chunks['IDAT'].recon_data)
+
+            new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
+            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
+
+            self.original_file.chunks['IDAT'].display_data('data before encryption')
+
+            self.original_file.chunks['IDAT'].data = new_idat_data[0]
+            self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
+            # print('new_file', new_file.chunks['IDAT'].data)
+            self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
+            self.data_after_encryption = new_idat_data[0]
+            self.original_file.chunks['IDAT'].display_data('data after encryption')
+            # new_file.print_encrypted_file(encrypted_data_ebc[1], new_idat_data[1])
+            # print('data after encryption', self.data_after_encryption)
 
         def decrypt_cbc():
-            pass
+            # print('data after encryption', data_after_encryption)
+            self.data_after_decryption = self.DecryptEncryptAlgorithm.decrypt_cbc(self.data_after_encryption, self.after_iend_data)
+            self.original_file.chunks['IDAT'].display_data('data before decryption')
+            self.original_file.chunks['IDAT'].data = self.data_after_decryption
+            self.original_file.chunks['IDAT'].recon_data = self.data_after_decryption
+            self.original_file.chunks['IDAT'].display_data('data decrypted')
 
         def compare():
-            pass
+            self.DecryptEncryptAlgorithm = DecryptEncryptAlgorithm(1024)
+            encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_ecb(self.original_file.chunks['IDAT'].recon_data)
+
+            new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
+            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
+
+            # self.original_file.chunks['IDAT'].display_data('data before encryption')
+
+            self.original_file.chunks['IDAT'].data = new_idat_data[0]
+            self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
+            # print('new_file', new_file.chunks['IDAT'].data)
+            self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
+            self.data_after_encryption = new_idat_data[0]
+            self.original_file.chunks['IDAT'].display_data('data after encryption with rsa module')
+
+            self.DecryptEncryptAlgorithm = DecryptEncryptAlgorithm(1024)
+            encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_from_rsa_module(self.original_file.chunks['IDAT'].recon_data)
+
+            new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
+            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
+
+            # self.original_file.chunks['IDAT'].display_data('data before encryption')
+
+            self.original_file.chunks['IDAT'].data = new_idat_data[0]
+            self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
+            # print('new_file', new_file.chunks['IDAT'].data)
+            self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
+            self.data_after_encryption = new_idat_data[0]
+            self.original_file.chunks['IDAT'].display_data('data after encryption')
 
         def go_back():
             clear_terminal()
@@ -167,8 +247,8 @@ class Menu:
             self.active_options = Menu.file_options
 
         switch = {
-            '1': encrypt,
-            '2': decrypt,
+            '1': encrypt_ecb,
+            '2': decrypt_ecb,
             '3': encrypt_cbc,
             '4': decrypt_cbc,
             '5': compare,

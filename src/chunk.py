@@ -5,6 +5,7 @@ class Chunk:
         self.data = None
         self.chunk_type = None
         self.length = None
+        self.raw_data = None
 
         if chunk_bytes and not is_chunk_list:
             self.single_chunk_init(chunk_bytes)
@@ -18,12 +19,14 @@ class Chunk:
         self.chunk_type = chunk_bytes[4:8].decode('utf-8')
         self.data = chunk_bytes[8:8 + self.length]
         self.crc = chunk_bytes[-4:]
-
+        self.raw_data = chunk_bytes
+        
     def multiple_chunk_init(self, chunk_list):
         self.length = [chunk.length for chunk in chunk_list]
         self.chunk_type = chunk_list[0].chunk_type
         self.data = [chunk.data for chunk in chunk_list]
         self.crc = [chunk.crc for chunk in chunk_list]
+        self.raw_data = [chunk.raw_data for chunk in chunk_list]
 
     def is_critical(self):
         return self.chunk_type[0].isupper()
