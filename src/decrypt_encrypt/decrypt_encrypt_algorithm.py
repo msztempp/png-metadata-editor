@@ -64,8 +64,8 @@ class DecryptEncryptAlgorithm:
             cipher_int = pow(int.from_bytes(chunk_to_encrypt, 'big'), self.public_key[1], self.public_key[0])
             cipher_bytes = cipher_int.to_bytes(self.encrypted_chunk_size, 'big')
 
-            for i in range(self.encrypted_chunk_size - 1):
-                cipher_data.append(cipher_bytes[i])
+            for j in range(self.encrypted_chunk_size - 1):
+                cipher_data.append(cipher_bytes[j])
             after_iend_data.append(cipher_bytes[-1])
         cipher_data.append(after_iend_data.pop())
 
@@ -122,8 +122,8 @@ class DecryptEncryptAlgorithm:
             prev=cipher_int
             cipher_bytes = cipher_int.to_bytes(self.encrypted_chunk_size, 'big')
 
-            for i in range(self.encrypted_chunk_size - 1):
-                cipher_data.append(cipher_bytes[i])
+            for j in range(self.encrypted_chunk_size - 1):
+                cipher_data.append(cipher_bytes[j])
             after_iend_data.append(cipher_bytes[-1])
         cipher_data.append(after_iend_data.pop())
 
