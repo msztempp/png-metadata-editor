@@ -70,12 +70,12 @@ class DecryptEncryptAlgorithm:
         return cipher_data, after_iend_data
 
     def concat_data(self, data, after_iend_data: deque):
-        data = []
+        returned_data = []
         for i in range(0, len(data), self.encrypted_chunk_size - 1):
-            data.extend(data[i:i + self.encrypted_chunk_size - 1])
-            data.append(after_iend_data.popleft())
-        data.extend(after_iend_data)
-        return data
+            returned_data.extend(data[i:i + self.encrypted_chunk_size - 1])
+            returned_data.append(after_iend_data.popleft())
+        returned_data.extend(after_iend_data)
+        return returned_data
 
     def decrypt_ecb(self, data, after_iend_data):
         data_to_decrypt = self.concat_data(data, deque(after_iend_data))
