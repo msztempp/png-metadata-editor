@@ -157,3 +157,16 @@ class DecryptEncryptAlgorithm:
                 decrypted_data.append(byte)
 
         return decrypted_data
+
+    def separate_after_iend(self, cipher_data):
+        # ECB with RSA creates slightly bigger IDAT, so we need to put new pixels after IEND
+        cipher_data = deque(cipher_data)
+        idat_data = []
+        after_iend_data = []
+        for i in range(self.original_data_length):
+            idat_data.append(cipher_data.popleft())
+        for i in range(len(cipher_data)):
+            after_iend_data.append(cipher_data.popleft())
+
+        return idat_data, after_iend_data
+
