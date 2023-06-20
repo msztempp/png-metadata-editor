@@ -103,6 +103,7 @@ class DecryptEncryptAlgorithm:
 
         return decrypted_data
 
+    # https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher_block_chaining_(CBC)
     def encrypt_cbc(self, data_to_encrypt):
         cipher_data=[]
         after_iend_data = []
