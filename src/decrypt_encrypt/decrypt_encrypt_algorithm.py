@@ -29,7 +29,16 @@ class DecryptEncryptAlgorithm:
 
     def encrypt_from_rsa_module(self, data_to_encrypt, key):
         data_after_encryption = []
-        step = self.key_size // 8 - 11  # convert to bytes
-        for i in range(0, len(data_to_encrypt), step):
+        block_size_bytes = self.key_size // 8 - 11  # convert to bytes
 
+        for i in range(0, len(data_to_encrypt), block_size_bytes):
+            raw_bytes = bytearray(data_to_encrypt[i:i + block_size_bytes])
+            input_length = len(raw_bytes)
+            bytes_after_encryption = rsa.encrypt(raw_bytes, key)
 
+            for j in range(0, input_length):
+                if j < input_length - 1:
+                    data_after_encryption.append(bytes_after_encryption[j])
+                else:
+                    data_after_encryption.append(int.from_bytes(bytes_after_encryption[j:], 'big'))
+        return data_after_encryption

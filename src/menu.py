@@ -145,8 +145,6 @@ class Menu:
         switch.get(choice, Menu.invalid_option)()
 
     def decrypt_encrypt_menu(self):
-        encrypted_data = None
-        decrypted_data = None
 
         def encrypt():
             pass
@@ -161,9 +159,8 @@ class Menu:
             pass
 
         def compare():
-            global data_after_encrypt
-            key_size = int(input(' Enter key size: ').lower())
-            data = self.original_file.chunks['IDAT'].recon_data
+            pass
+
         def go_back():
             clear_terminal()
             self.active_menu = self.menu_file
