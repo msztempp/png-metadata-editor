@@ -1,3 +1,5 @@
+from collections import deque
+
 import rsa
 import math_calculations
 
@@ -7,6 +9,9 @@ class DecryptEncryptAlgorithm:
         self.key_size = key_size
         self.generate_key(m)
         [self.public_key, self.private_key] = rsa.newkeys(key_size)
+
+        self.encrypted_chunk_size= self.key_size//8
+        self.original_data_length=None
 
     # https://www.tutorialspoint.com/cryptography/public_key_encryption.htm#:~:text=Generation%20of%20RSA%20Key%20Pair&text=Calculate%20n%3Dp*q.,a%20minimum%20of%20512%20bits.
     def generate_key(self, m):
@@ -42,3 +47,53 @@ class DecryptEncryptAlgorithm:
                 else:
                     data_after_encryption.append(int.from_bytes(bytes_after_encryption[j:], 'big'))
         return data_after_encryption
+
+    def encrypt_ecb(self,data_to_encrypt):
+        cipher_data=[]
+        after_iend_data=[]
+        self.original_data_length=len(data_to_encrypt)
+
+        for i in range(0, len(data_to_encrypt), self.encrypted_chunk_size-1):
+            chunk_to_encrypt=bytes(data_to_encrypt[i:i+self.encrypted_chunk_size-1])
+
+            cipher_int = pow(int.from_bytes(chunk_to_encrypt,'big'),self.public_key[1], self.public_key[0])
+            cipher_bytes=cipher_int.to_bytes(self.encrypted_chunk_size,'big')
+
+            for i in range(self.encrypted_chunk_size-1):
+                cipher_data.append(cipher_bytes[i])
+            after_iend_data.append(cipher_bytes[-1])
+        cipher_data.append(after_iend_data.pop())
+
+        return cipher_data, after_iend_data
+
+    def concat_data(self, data, after_iend_data: deque):
+        data=[]
+        for i in range(0, len(data), self.encrypted_chunk_size-1):
+            data.extend(data[i:i+self.encrypted_chunk_size-1])
+            data.append(after_iend_data.popleft())
+        data.extend(after_iend_data)
+        return data
+
+    def decrypt_ecb(self, data, after_iend_data):
+        data_to_decrypt = self.concat_data(data, deque(after_iend_data))
+        decrypted_data=[]
+
+        for i in range(0, len(data_to_decrypt),self.encrypted_chunk_size):
+            chunk_to_decrypt = bytes(data_to_decrypt[i:i+self.encrypted_chunk_size])
+            decrypted_int=pow(int.from_bytes(chunk_to_decrypt,'big'),self.private_key,self.public_key[0])
+
+            # We don't know how long was the last original chunk (no matter what, chunks after encryption have fixed key-length size, so extra bytes could have been added),
+            # so below, before creating decrypted_bytes of fixed size we check if adding it to decrypted_data wouldn't exceed the original_data_len
+            # If it does, we know that the length of last chunk was smaller and we can retrieve it's length
+            if len(decrypted_data)+ self.encrypted_chunk_size-1 > self.original_data_length:
+                #last original chunk
+                decrypted_length_bytes = self.original_data_length-len(decrypted_data)
+            else:
+                decrypted_length_bytes = self.encrypted_chunk_size-1
+
+            decrypted_bytes = decrypted_int.to_bytes(decrypted_length_bytes,'big')
+
+            for byte in decrypted_bytes:
+                decrypted_data.append(byte)
+
+        return decrypted_data
