@@ -163,21 +163,16 @@ class Menu:
             encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_ecb(self.original_file.chunks['IDAT'].recon_data)
 
             new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
-            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
 
             self.original_file.chunks['IDAT'].display_data('data before encryption')
 
             self.original_file.chunks['IDAT'].data = new_idat_data[0]
             self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
-            # print('new_file', new_file.chunks['IDAT'].data)
             self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
             self.data_after_encryption = new_idat_data[0]
             self.original_file.chunks['IDAT'].display_data('data after encryption')
-            # new_file.print_encrypted_file(encrypted_data_ebc[1], new_idat_data[1])
-            # print('data after encryption', self.data_after_encryption)
 
         def decrypt_ecb():
-            # print('data after encryption', data_after_encryption)
             self.data_after_decryption = self.DecryptEncryptAlgorithm.decrypt_ecb(self.data_after_encryption, self.after_iend_data)
             self.original_file.chunks['IDAT'].display_data('data before decryption')
             self.original_file.chunks['IDAT'].data = self.data_after_decryption
@@ -189,21 +184,17 @@ class Menu:
             encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_cbc(self.original_file.chunks['IDAT'].recon_data)
 
             new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
-            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
 
             self.original_file.chunks['IDAT'].display_data('data before encryption')
 
             self.original_file.chunks['IDAT'].data = new_idat_data[0]
             self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
-            # print('new_file', new_file.chunks['IDAT'].data)
+
             self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
             self.data_after_encryption = new_idat_data[0]
             self.original_file.chunks['IDAT'].display_data('data after encryption')
-            # new_file.print_encrypted_file(encrypted_data_ebc[1], new_idat_data[1])
-            # print('data after encryption', self.data_after_encryption)
 
         def decrypt_cbc():
-            # print('data after encryption', data_after_encryption)
             self.data_after_decryption = self.DecryptEncryptAlgorithm.decrypt_cbc(self.data_after_encryption, self.after_iend_data)
             self.original_file.chunks['IDAT'].display_data('data before decryption')
             self.original_file.chunks['IDAT'].data = self.data_after_decryption

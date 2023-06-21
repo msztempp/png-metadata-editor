@@ -34,7 +34,6 @@ class File:
 
     def load_and_get_name(self, pathname):
         try:
-            # pathname = pathname.lower()
             self.file_name = os.path.basename(pathname)
             self.name_without_extension = os.path.splitext(self.file_name)[0]
 
@@ -79,15 +78,6 @@ class File:
         length = int.from_bytes(self.byte_data[start:start + 4], 'big')
         end = start + length + 12
         return self.byte_data[start:end]
-
-    # def get_chunk_data_encrypt(self, index):
-    #     start = index
-    #     
-    #     length = int.from_bytes(self.byte_data[start:start + 4], 'big')
-    #     end = start + length + 12
-    #     data = self.byte_data[start:8]
-    #     data += self.data
-    #     return self.byte_data[start:end]
 
     def get_chunks(self):
         for chunks_dict in self.chunks_indices.values():
@@ -157,25 +147,6 @@ class File:
         print('Saved only with critical chunks to:\n', new_name)
         print()
         tmp_png.close()
-
-    # def print_encrypted_file(self, after_iend_data_embedded, after_iend_data, file):
-    #     folder_path = '../img-encrypted'
-    #     if not os.path.exists(folder_path):
-    #         os.makedirs(folder_path)
-    # 
-    #     new_name = os.path.join(folder_path, '{}_encrypted.png'.format(self.name_without_extension))
-    #     tmp_png = open(new_name, 'wb')
-    #     tmp_png.write(self.byte_data[:8])
-    #     tmp_png.write(file.chunks['IHDR'].raw_data)
-    #     tmp_png.write(file.chunks['IDAT'].)
-    #     # original_idat = self.get_chunk_data(b'IDAT')
-    #     # print(original_idat)
-    #     # tmp_png.write(chunk.raw_data)
-    #     tmp_png.write(bytes(after_iend_data_embedded))
-    #     tmp_png.write(bytes(after_iend_data))
-    #     print('Saved only with critical chunks to:\n', new_name)
-    #     print()
-    #     tmp_png.close()
 
     def perform_fft(self):
         img = cv2.imread(self.pathname)

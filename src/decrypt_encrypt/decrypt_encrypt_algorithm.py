@@ -13,27 +13,24 @@ class DecryptEncryptAlgorithm:
 
         self.key_size = key_size
         self.generate_key(key_size)
-        # [self.public_key, self.private_key] = rsa.newkeys(key_size)
 
         self.encrypted_chunk_size = self.key_size // 8
         self.original_data_length = None
         self.IV = None  # initialization vector
 
     # https://www.tutorialspoint.com/cryptography/public_key_encryption.htm#:~:text=Generation%20of%20RSA%20Key%20Pair&text=Calculate%20n%3Dp*q.,a%20minimum%20of%20512%20bits.
-    def generate_key(self, m):
+    def generate_key(self, key_size):
         prime_a, prime_b = math_calculations.generate_prime_pair(self.key_size)
-        # self.public_key = []
         e = None
-        n = 0
-        while m > n:
-            n = prime_a * prime_b
-        # self.public_key.append(n)
+        modulo_n = 0
+        while key_size > modulo_n:
+            modulo_n = prime_a * prime_b
+
         ed = (prime_a - 1) * (prime_b - 1)
         for e in range(2, ed):
             if math_calculations.greatest_common_divisor(e, ed) == 1:
-                # self.public_key.append(e)
                 break
-        self.public_key = (n, e)
+        self.public_key = (modulo_n, e)
         print('Public key:', self.public_key)  # [n, e] where n is the modulo and e is the public exponent
         modular_inverse = math_calculations.inverse_modulo(e, ed)
         self.private_key = int(modular_inverse)
@@ -89,18 +86,14 @@ class DecryptEncryptAlgorithm:
         return returned_data
 
     def decrypt_ecb(self, data, after_iend_data):
-        data_to_decrypt = self.concat_data(data, deque(after_iend_data))
         decrypted_data = []
+        data_to_decrypt = self.concat_data(data, deque(after_iend_data))
 
         for i in range(0, len(data_to_decrypt), self.encrypted_chunk_size):
             chunk_to_decrypt = bytes(data_to_decrypt[i:i + self.encrypted_chunk_size])
             decrypted_int = pow(int.from_bytes(chunk_to_decrypt, 'big'), self.private_key, self.public_key[0])
 
-            # We don't know how long was the last original chunk (no matter what, chunks after encryption have fixed key-length size, so extra bytes could have been added),
-            # so below, before creating decrypted_bytes of fixed size we check if adding it to decrypted_data wouldn't exceed the original_data_len
-            # If it does, we know that the length of last chunk was smaller and we can retrieve it's length
             if len(decrypted_data) + self.encrypted_chunk_size - 1 > self.original_data_length:
-                # last original chunk
                 decrypted_length_bytes = self.original_data_length - len(decrypted_data)
             else:
                 decrypted_length_bytes = self.encrypted_chunk_size - 1
@@ -147,11 +140,7 @@ class DecryptEncryptAlgorithm:
             chunk_to_decrypt = bytes(data_to_decrypt[i:i + self.encrypted_chunk_size])
             decrypted_int = pow(int.from_bytes(chunk_to_decrypt, 'big'), self.private_key, self.public_key[0])
 
-            # We don't know how long was the last original chunk (no matter what, chunks after encryption have fixed key-length size, so extra bytes could have been added),
-            # so below, before creating decrypted_bytes of fixed size we check if adding it to decrypted_data wouldn't exceed the original_data_len
-            # If it does, we know that the length of last chunk was smaller and we can retrieve it's length
             if len(decrypted_data) + self.encrypted_chunk_size - 1 > self.original_data_length:
-                # last original chunk
                 decrypted_length_bytes = self.original_data_length - len(decrypted_data)
             else:
                 decrypted_length_bytes = self.encrypted_chunk_size - 1
@@ -169,19 +158,13 @@ class DecryptEncryptAlgorithm:
         return decrypted_data
 
     def separate_after_iend(self, cipher_data):
-        # ECB with RSA creates slightly bigger IDAT, so we need to put new pixels after IEND
         cipher_data = deque(cipher_data)
-        # print(cipher_data)
         idat_data = []
         after_iend_data = []
-        # print(self.original_data_length)
-        # print('len data', len(cipher_data))
+
         for i in range(self.original_data_length):
             idat_data.append(cipher_data.popleft())
         for i in range(len(cipher_data)):
             after_iend_data.append(cipher_data.popleft())
 
         return idat_data, after_iend_data
-
-    # def replace_idat_chunks(self, chunk, new_idat):
-    #     chunk.data
