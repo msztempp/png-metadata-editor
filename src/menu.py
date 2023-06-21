@@ -211,35 +211,36 @@ class Menu:
             self.original_file.chunks['IDAT'].display_data('data decrypted')
 
         def compare():
+            original_data_to_compare = self.original_file.chunks['IDAT'].recon_data
             self.DecryptEncryptAlgorithm = DecryptEncryptAlgorithm(1024)
             encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_ecb(self.original_file.chunks['IDAT'].recon_data)
 
             new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
-            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
+            ecb_data_to_compare = new_idat_data[0]
+            self.original_file.chunks['IDAT'].data = ecb_data_to_compare
+            self.original_file.chunks['IDAT'].recon_data = ecb_data_to_compare
 
-            # self.original_file.chunks['IDAT'].display_data('data before encryption')
+            self.original_file.chunks['IDAT'].display_data('data after encryption with ebc')
 
-            self.original_file.chunks['IDAT'].data = new_idat_data[0]
-            self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
-            # print('new_file', new_file.chunks['IDAT'].data)
-            self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
-            self.data_after_encryption = new_idat_data[0]
-            self.original_file.chunks['IDAT'].display_data('data after encryption with rsa module')
+            self.DecryptEncryptAlgorithm = DecryptEncryptAlgorithm(1024)
+            encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_cbc(self.original_file.chunks['IDAT'].recon_data)
+
+            new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
+            cbc_data_to_compare = new_idat_data[0]
+            self.original_file.chunks['IDAT'].data = cbc_data_to_compare
+            self.original_file.chunks['IDAT'].recon_data = cbc_data_to_compare
+
+            self.original_file.chunks['IDAT'].display_data('data after with cbc module')
 
             self.DecryptEncryptAlgorithm = DecryptEncryptAlgorithm(1024)
             encrypted_data_ebc = self.DecryptEncryptAlgorithm.encrypt_from_rsa_module(self.original_file.chunks['IDAT'].recon_data)
 
             new_idat_data = self.DecryptEncryptAlgorithm.separate_after_iend(encrypted_data_ebc[0])
-            # print('recon data', self.original_file.chunks['IDAT'].recon_data)
+            rsa_data_to_compare = new_idat_data[0]
+            self.original_file.chunks['IDAT'].data = rsa_data_to_compare
+            self.original_file.chunks['IDAT'].recon_data = rsa_data_to_compare
 
-            # self.original_file.chunks['IDAT'].display_data('data before encryption')
-
-            self.original_file.chunks['IDAT'].data = new_idat_data[0]
-            self.original_file.chunks['IDAT'].recon_data = new_idat_data[0]
-            # print('new_file', new_file.chunks['IDAT'].data)
-            self.after_iend_data = encrypted_data_ebc[1] + new_idat_data[1]
-            self.data_after_encryption = new_idat_data[0]
-            self.original_file.chunks['IDAT'].display_data('data after encryption')
+            self.original_file.chunks['IDAT'].display_data('data after with rsa module')
 
         def go_back():
             clear_terminal()

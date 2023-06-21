@@ -1,8 +1,8 @@
 import random
 from collections import deque
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Cipher import PKCS1_OAEP
 
-from crypto.PublicKey import RSA
-from crypto.Cipher import PKCS1_OAEP
 import src.decrypt_encrypt.math_calculations as math_calculations
 
 
@@ -44,15 +44,15 @@ class DecryptEncryptAlgorithm:
         after_iend_data = []
         self.original_data_length = len(data_to_encrypt)
 
-        rsa_key = RSA.construct((self.public_key[0], self.public_key[1]))
-        cipher_rsa = PKCS1_OAEP.new(rsa_key)
+        rsa_public_key = RSA.construct((self.public_key[0], self.public_key[1]))
+        rsa_cipher = PKCS1_OAEP.new(rsa_public_key)
 
-        for i in range(0, len(data_to_encrypt), self.encrypted_chunk_size - 1):
-            chunk_to_encrypt = data_to_encrypt[i:i + self.encrypted_chunk_size - 1]
+        for i in range(0, len(data_to_encrypt), self.key_size // 16):
+            chunk_to_encrypt = bytes(data_to_encrypt[i:i + self.key_size // 16])
 
-            cipher_bytes = cipher_rsa.encrypt(chunk_to_encrypt)
+            cipher_bytes = rsa_cipher.encrypt(chunk_to_encrypt)
 
-            for j in range(self.encrypted_chunk_size - 1):
+            for j in range(self.key_size // 16):
                 cipher_data.append(cipher_bytes[j])
             after_iend_data.append(cipher_bytes[-1])
         cipher_data.append(after_iend_data.pop())
