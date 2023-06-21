@@ -95,7 +95,7 @@ class IDAT(Chunk):
         else:
             ax.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
         plt.imshow(np.array(data).reshape((self.height, self.width, bytes_per_pixel)))
-        title = title + ' data'
+        title = title
         ax.set_title(title)
         plt.draw()
         plt.show()
