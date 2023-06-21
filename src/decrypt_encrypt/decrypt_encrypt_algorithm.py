@@ -22,9 +22,7 @@ class DecryptEncryptAlgorithm:
     def generate_key(self, key_size):
         prime_a, prime_b = math_calculations.generate_prime_pair(self.key_size)
         e = None
-        modulo_n = 0
-        while key_size > modulo_n:
-            modulo_n = prime_a * prime_b
+        modulo_n = prime_a * prime_b
 
         ed = (prime_a - 1) * (prime_b - 1)
         for e in range(2, ed):
